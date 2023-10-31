@@ -1,4 +1,4 @@
-# MyBatis问题
+# MyBatis 常见错误
 
 - [mabatis报错:Result typenot match for select id=XXX](#jump1)
 - [判断Integer类型，值为0动态SQL不生效](#jump2)
@@ -29,6 +29,6 @@ where 1 = 1
 
 因此表达式status != ''被当做status != 0来判断，所以当status=0时，if条件判断不通过。
 
-我们只需要将status!=''条件去掉就可以解决上面这个问题。
+只需要将status!=''条件去掉就可以解决上面这个问题。
 
 尽量使用包装类：java的基本数据类型都会有默认值，如果直接使用基本数据类型会给查询带来不必要的麻烦，所以尽量使用包装类代替。
