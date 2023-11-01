@@ -196,8 +196,8 @@ public void testGetEmpAndDeptByStep() throws IOException {
 
 **例**：
 
-```
-<collection property="orderList"        ofType="net.biancheng.po.Order" column="id"        select="net.biancheng.mapper.OrderMapper.selectOrderById" />
+```xml
+<collection property="orderList"        ofType="com.hjc.demo.po.Order" column="id"        select="com.hjc.demo.mapper.OrderMapper.selectOrderById" />
 ```
 
 
