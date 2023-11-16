@@ -1,10 +1,10 @@
 # Nacos 服务注册与发现
 
-实现基于Nacos的服务注册与发现，需要导入SpringCloudAlibaba相关的依赖。
-
 **官方文档**：https://github.com/alibaba/spring-cloud-alibaba/wiki/Nacos-discovery
 
 ## 服务注册与发现
+
+实现基于Nacos的服务注册与发现，需要导入SpringCloudAlibaba相关的依赖。
 
 在父工程将依赖进行管理：
 
