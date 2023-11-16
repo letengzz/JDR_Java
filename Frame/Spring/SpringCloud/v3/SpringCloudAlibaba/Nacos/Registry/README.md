@@ -92,7 +92,7 @@ spring:
    </dependency>
    ```
 
-2. 修改RestTemplate：
+2. 添加配置类，注册RestTemplate：
 
    ```java
    @Configuration

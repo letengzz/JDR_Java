@@ -78,7 +78,7 @@ spring:
    </dependency>
    ```
 
-2. 添加配置文件：**Data ID**的格式：`应用名称.yml`
+2. 添加配置文件：**Data ID**的格式：`应用名称.yaml`
 
    ![image-20231115133537166](assets/image-20231115133537166.png)
 

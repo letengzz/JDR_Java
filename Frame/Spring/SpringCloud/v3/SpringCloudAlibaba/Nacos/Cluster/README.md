@@ -54,7 +54,7 @@ SLB最上方还有一个DNS是因为SLB是裸IP，如果SLB服务器修改了地
 
 ![image-20231112152313770](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202311121523026.png)
 
-Client 连接 Nacos 集群：直接将微服务配置文件 application.yml 中的 nacos 地址更换为 Nacos 集群的 VIP 地址。 
+Client 连接 Nacos 集群：直接将微服务配置文件 application.yaml 中的 nacos 地址更换为 Nacos 集群的 VIP 地址。 
 
 ```yaml
 spring:
@@ -147,7 +147,7 @@ sudo apt install nginx
 
 可以看到直接请求80端口之后得到，表示安装成功：
 
-![image-20231112223125093](assets/image-20231112223125093.png)
+![image-20231112223125093](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202311161301261.png)
 
 让其代理刚刚启动的三个Nacos服务器，需要对其进行一些配置。配置文件位于`/etc/nginx/nginx.conf`，添加以下内容：
 

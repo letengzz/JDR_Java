@@ -96,17 +96,17 @@ Data ID它的定义规则是：`${prefix}-${spring.profile.active}.${file-extens
 
 **操作步骤**：
 
-1. 新建配置，创建配置文件Data ID为：`bookservice-dev.yml`, Group为：`DEV_GROUP`, 其配置：
+1. 新建配置，创建配置文件Data ID为：`bookservice-dev.yaml`, Group为：`DEV_GROUP`, 其配置：
 
    ![image-20231115213335230](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202311152133271.png)
 
-2. 继续创建配置文件Data ID为：`bookservice-dev.yml`, Group为：`TEST_GROUP`, 其配置：
+2. 继续创建配置文件Data ID为：`bookservice-dev.yaml`, Group为：`TEST_GROUP`, 其配置：
 
    ![image-20231115213544367](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202311152135540.png)
 
 > 这里的两个配置文件他们的DataID相同但是Group不同
 
-3. 修改项目中的配置文件`bootstrap.yml`
+3. 修改项目中的配置文件`bootstrap.yaml`
 
    在config下增加一条group的配置，指定配置文件所在的group，可配置为`DEV_GROUP`或`TEST_GROUP`
 
@@ -286,7 +286,7 @@ spring:
   </profiles>
   ```
 
-2. application.yml
+2. application.yaml
 
   ```yaml
   spring:
@@ -294,7 +294,7 @@ spring:
       active: @profileActive@
   ```
 
-3. bootstrap.yml
+3. bootstrap.yaml
 
   ```yaml
   spring:

@@ -74,7 +74,7 @@ Nacos-server其实就是一个Java工程或者说是一个Springboot项目，配
 
    ![image-20231111160659180](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202311111607353.png)
 
-5. 在公共空间(public)中新建一个配置文件DataID: `nacos-config.yml`, 配置内容如下：
+5. 在公共空间(public)中新建一个配置文件DataID: `nacos-config.yaml`, 配置内容如下：
 
    ```yaml
    server: 
