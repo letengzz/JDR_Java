@@ -6,7 +6,7 @@ Nacos 中的服务是由三元组唯一确定的：工作空间(namespace)、工
 
 namespace 与 group 的作用是相同的，用于划分不同的区域范围，隔离服务。不同的是， namespace 的范围更大，不同的 namespace 中可以包含相同的 group。不同的 group 中可以 包含相同的 service。
 
-namespace 的默认值为 `public`，group 的默认值为 `DEFAULT_GROUP`。
+namespace 的默认值为公共命名空间`public` (ID值为空串)，group 的默认值为 `DEFAULT_GROUP`。
 
 之间的关系：
 

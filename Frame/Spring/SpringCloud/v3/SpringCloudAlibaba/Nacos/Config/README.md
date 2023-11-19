@@ -110,7 +110,7 @@ spring:
 
 ## 配置文件拓展
 
-当前服务配置、共享配置与扩展配置的加载顺序为：共享配置，扩展配置，当前服务配 置。若在三个配置中具有相同属性设置，但它们具有不同的值，那么，后加载的会将先加载 的给覆盖。即这三类配置的优先级由低到高是：共享配置，扩展配置，当前服务配置
+共享配置与扩展配置：
 
 ```yaml
 spring:
@@ -128,15 +128,19 @@ spring:
         # 同一个group中的不同服务可以共享以下 "共享配置"
         shared-configs[0]:
           data-id: shareconfig.yaml
+          # 自动更新
           refresh: true
         # 不同group 中的不同服务可以共享以下 "扩展配置"
         extension-configs[0]:
           data-id: extconfig.yaml
+          # 自动更新
           refresh: true
   config:
     import:
       - optional:nacos:${spring.application.name}.${spring.cloud.nacos.config.file-extension}
 ```
+
+**当前服务配置、共享配置与扩展配置的加载顺序**：共享配置，扩展配置，当前服务配置。若在三个配置中具有相同属性设置，但它们具有不同的值，那么，后加载的会将先加载 的给覆盖。即这三类**配置的优先级**由低到高是：共享配置，扩展配置，当前服务配置
 
 ## 当前服务配置优先级
 

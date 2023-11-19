@@ -81,7 +81,7 @@ spring:
 
 ## 调用服务并实现负载均衡
 
-使用 [LoadBalancer]() 调用服务提供者并实现负载均衡
+使用 [LoadBalancer](../../../SpringCloud/LoadBalancer/README.md) 调用服务提供者并实现负载均衡
 
 1. 导入依赖：
 
@@ -150,7 +150,7 @@ spring:
 
 4. 配置多个服务并修改端口号：
 
-   ![image-20231111002959060](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202311110030304.png)
+   ![image-20231118141605267](assets/image-20231118141605267.png)
 
 5. 添加测试方法：
 
@@ -212,7 +212,7 @@ spring:
 
 ## 服务发现远程调用
 
-使用[OpenFeign]()，也可以实现服务发现远程调用并实现负载均衡。
+使用[OpenFeign](../../../SpringCloud/OpenFeign/README.md)，也可以实现服务发现远程调用并实现负载均衡。
 
 **导入依赖**：
 
@@ -230,7 +230,7 @@ spring:
 编写接口：
 
 ```java
-@FeignClient("userservice")
+@FeignClient("user-service")
 public interface UserClient {
     
     @RequestMapping("/user/{uid}")
@@ -239,7 +239,7 @@ public interface UserClient {
 ```
 
 ```java
-@FeignClient("bookservice")
+@FeignClient("book-service")
 public interface BookClient {
 
     @RequestMapping("/book/{bid}")
