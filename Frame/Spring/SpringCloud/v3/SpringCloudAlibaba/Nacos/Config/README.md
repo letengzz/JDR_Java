@@ -80,7 +80,7 @@ spring:
 
 2. 添加配置文件：**Data ID**的格式：`应用名称.yaml`
 
-   ![image-20231115133537166](assets/image-20231115133537166.png)
+   ![image-20231115133537166](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202311191258164.png)
 
 3. 在借阅服务中删除`applicaiton.yaml`添加`bootstrap.yaml`文件：
 
@@ -171,7 +171,7 @@ Nacos还支持配置文件的热更新，比如在配置文件中添加了一个
 @RefreshScope   //添加此注解实现自动刷新
 public class TestController {
     
-    @Value("${test.txt}")  //我们从配置文件中读取test.txt的字符串值，作为test接口的返回值
+    @Value("${test.txt}")  //从配置文件中读取test.txt的字符串值，作为test接口的返回值
     String txt;
     
     @RequestMapping("/test")

@@ -150,7 +150,7 @@ spring:
 
 4. 配置多个服务并修改端口号：
 
-   ![image-20231118141605267](assets/image-20231118141605267.png)
+   ![image-20231118141605267](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202311191250891.png)
 
 5. 添加测试方法：
 

@@ -141,8 +141,16 @@ bash nacos3/bin/startup.sh
 
 直接安装：
 
+> Ubuntu
+
 ```sh
 sudo apt install nginx
+```
+
+> Centos
+
+```shell
+yum install nginx -y
 ```
 
 可以看到直接请求80端口之后得到，表示安装成功：
@@ -170,6 +178,10 @@ server {
 ```
 
 重启Nginx服务器(`nginx -s reload`)，成功连接：
+
+```nginx
+nginx -s reload
+```
 
 ![image-20231112223943052](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202311122239422.png)
 

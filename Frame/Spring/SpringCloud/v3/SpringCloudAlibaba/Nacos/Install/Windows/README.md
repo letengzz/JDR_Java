@@ -64,6 +64,6 @@ startup.cmd -m standalone
 
 ![image-20231110165238148](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202311101652314.png)
 
-默认的用户名和管理员密码都是`nacos`，该默认账号与密码存放在 nacos 内置 mysql 数据 库中的，而非存放在某配置文件中。若要添加账号或修改密码，可在登录后通过页面修改。直接登陆即可，可以看到进入管理页面：
+默认的用户名和管理员密码都是`nacos`，该默认账号与密码存放在 nacos 内置 mysql数据库中的，而非存放在某配置文件中。若要添加账号或修改密码，可在登录后通过页面修改。直接登陆即可，可以看到进入管理页面：
 
 ![image-20231110165303299](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202311101653716.png)
