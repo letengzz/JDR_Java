@@ -3,7 +3,7 @@
 ![img](https://maven.apache.org/images/maven-logo-black-on-white.png)
 
 - [Maven 概述](Basis/Introduce/README.md)
-- [Maven 安装及配置核心程序](Basis/Install.md)
+- [Maven 安装及配置核心程序](Basis/Install/README.md)
 - [Maven 核心概念](Core/README.md)
 - [Maven 创建工程](Create/README.md)
 - [Maven 命令](Command/README.md)
