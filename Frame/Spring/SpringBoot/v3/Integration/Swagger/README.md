@@ -8,9 +8,19 @@
 
 ****
 
-Swagger是全球最大的OpenAPI规范 (OAS) API开发工具框架，遵循 OpenAPI 规范。
+Swagger是全球最大的OpenAPI规范 (OAS) API开发工具框架，遵循 OpenAPI 规范。用于生成、描述、调用和可视化 RESTful 风格的 Web 服务。
 
-Swagger 可以快速**生成实时接口文档**，方便前后端开发人员进行协调沟通，依据接口文档进行开发。。
+Swagger 可以快速**生成实时接口文档**，方便前后端开发人员进行协调沟通，依据接口文档进行开发。
+
+**优点**：
+
+1. 及时性 (接口变更后，能够及时准确地通知相关前后端开发人员)
+
+2. 规范性 (并且保证接口的规范性，如接口的地址，请求方式，参数及响应格式和错误信息)
+
+3. 一致性 (接口信息一致，不会出现因开发人员拿到的文档版本不一致，而出现分歧)
+
+4. 可测性 (直接在接口文档上进行测试，以方便理解业务)
 
 **官方网站**： https://swagger.io/
 **官方文档**：https://springdoc.org/
@@ -23,42 +33,121 @@ Swagger 可以快速**生成实时接口文档**，方便前后端开发人员�
 
 Spring Boot 可以集成Swagger，Swaager根据Controller类中的注解生成接口文档 。
 
-导入依赖：
+**操作步骤**：
 
-```xml
-<dependency>
-    <groupId>org.springdoc</groupId>
-    <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-    <version>2.3.0</version>
-</dependency>
-```
+- 导入依赖：
 
-配置：
+  ```xml
+  <dependency>
+      <groupId>org.springdoc</groupId>
+      <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+      <version>2.3.0</version>
+  </dependency>
+  ```
 
-> application.properties
+- 配置：
 
-```properties
-# /api-docs endpoint custom path 默认 /v3/api-docs
-springdoc.api-docs.path=/api-docs
+  > application.properties
 
-# swagger 相关配置在  springdoc.swagger-ui
-# swagger-ui custom path
-springdoc.swagger-ui.path=/swagger-ui.html
-
-springdoc.show-actuator=true
-```
-
-> application.yaml
-
-```yaml
-springdoc:
+  ```properties
   # /api-docs endpoint custom path 默认 /v3/api-docs
-  api-docs.path: /api-docs
+  springdoc.api-docs.path=/api-docs
+  
   # swagger 相关配置在  springdoc.swagger-ui
   # swagger-ui custom path
-  swagger-ui.path: /swagger-ui.html
-  show-actuator: true
-```
+  springdoc.swagger-ui.path=/swagger-ui.html
+  
+  springdoc.show-actuator=true
+  ```
+
+  > application.yaml
+
+  ```yaml
+  springdoc:
+    # /api-docs endpoint custom path 默认 /v3/api-docs
+    api-docs.path: /api-docs
+    # swagger 相关配置在  springdoc.swagger-ui
+    # swagger-ui custom path
+    swagger-ui.path: /swagger-ui.html
+    show-actuator: true
+  ```
+
+## 集成Knife4j
+
+knife4j是为Java MVC框架集成Swagger生成Api文档的增强解决方案。
+
+文档地址：https://doc.xiaominfo.com/
+
+**操作步骤**：
+
+1. 创建spring boot项目并导入knife4j的依赖：
+
+   ```xml
+   <dependency>
+       <groupId>com.github.xiaoymin</groupId>
+       <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+       <version>4.3.0</version>
+   </dependency>
+   ```
+
+2. 属性的配置，如：作者、版本等可以在配置类中进行实现：
+
+   ```java
+   @Configuration
+   public class Knife4jConfig {
+   
+       @Bean
+       public OpenAPI springShopOpenAPI() {
+           return new OpenAPI()
+                   // 接口文档标题
+                   .info(new Info().title("一个API接口文档")
+                           // 接口文档简介
+                           .description("这是基于Knife4j OpenApi3的测试接口文档")
+                           // 接口文档版本
+                           .version("1.0版本")
+                           // 开发者联系方式
+                           .contact(new Contact().name("hjc")
+                                   .email("000000000@qq.com")))
+                   .externalDocs(new ExternalDocumentation()
+                           .description("SpringBoot3测试knife4j")
+                           .url("http://127.0.0.1:8888"));
+       }
+   
+   }
+   ```
+
+   也可以在yml配置文件中进行一些knife4j信息的配置：
+
+   ```yaml
+   #springdoc相关配置
+   springdoc:
+     swagger-ui:
+       #自定义swagger前端请求路径，输入http：127.0.0.1:8080/swagger-ui.html会自动重定向到swagger页面
+       path: /swagger-ui.html
+       tags-sorter: alpha
+       operations-sorter: alpha
+     api-docs:
+       path: /v3/api-docs    #swagger后端请求地址
+       enabled: true   #是否开启文档功能
+     group-configs:
+       - group: 'com.hjc.demo'
+         paths-to-match: '/**'
+         packages-to-scan: com.example.springboot3knife4j   #按包路径匹配:一般到启动类的包名
+   
+   #knife4j相关配置 可以不用改
+   knife4j:
+     enable: true    #开启knife4j，无需添加@EnableKnife4j注解
+     setting:
+       language: zh_cn   #中文
+     #开启Swagger的Basic认证功能,默认是false
+   #  basic:
+   #    enable: true
+       # Basic认证用户名
+   #    username: hjc
+       # Basic认证密码
+   #    password: 123456
+   ```
+
 
 ## 使用 
 
@@ -103,13 +192,15 @@ springdoc.pathsToMatch=/v1, /api/balance/**
 @Bean
 public OpenAPI springShopOpenAPI() {
 	return new OpenAPI()
-    	      .info(new Info().title("SpringShop API")
-              .description("Spring shop sample application")
-              .version("v0.0.1")
-              .license(new License().name("Apache 2.0").url("http://springdoc.org")))
+    	      .info(new Info().title("SpringShop API")   // 接口文档标题
+                  .description("Spring shop sample application") // 接口文档简介
+                  .version("v0.0.1") // 接口文档版本
+                  .license(new License().name("Apache 2.0").url("http://springdoc.org"))
+                  .contact(new Contact().name("hjc")
+                                .email("2020885569@qq.com"))) // 开发者联系方式
               .externalDocs(new ExternalDocumentation()
-              .description("SpringShop Wiki Documentation")
-              .url("https://springshop.wiki.github.org/docs"));
+                  .description("SpringShop Wiki Documentation")
+                  .url("https://springshop.wiki.github.org/docs"));
 }
 ```
 
@@ -183,5 +274,4 @@ public OpenAPI springShopOpenAPI() {
               .url("https://springshop.wiki.github.org/docs"));
 }
 ```
-
 
