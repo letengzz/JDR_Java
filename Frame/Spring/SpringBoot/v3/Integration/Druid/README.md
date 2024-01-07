@@ -153,7 +153,7 @@ public class UserController {
 
 **问题解决**：
 
-当使用1.2.20版本之前，通过源码分析druid-spring-boot-3-starter，虽然适配了SpringBoot3，但缺少自动装配的配置文件，需要手动在resources目录下创建META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports，文件内容如下!
+当使用1.2.20版本之前，通过源码分析druid-spring-boot-3-starter，虽然适配了SpringBoot3，但缺少自动装配的配置文件，需要手动在resources目录下创建`META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`，文件内容如下：
 
 ```java
 com.alibaba.druid.spring.boot3.autoconfigure.DruidDataSourceAutoConfigure
