@@ -1,5 +1,7 @@
 # Mybatis-Plus注解
 
+注解详细文档：https://baomidou.com/pages/223848/
+
 ## @TableName
 
 在使用MyBatis-Plus实现基本的CRUD时，并没有指定要操作的表，只是在 Mapper接口继承BaseMapper时，设置了泛型User，而操作的表为user表。
@@ -103,6 +105,8 @@ private String queryName;
 - **物理删除**：真实删除，将对应数据从数据库中删除，之后查询不到此条被删除的数据
 - **逻辑删除**：假删除，将对应数据中代表是否被删除字段的状态修改为“被删除状态”，之后在数据库中仍旧能看到此条数据记录 
 
+逻辑删除，可以方便地实现对数据库记录的逻辑删除而不是物理删除。逻辑删除是指通过更改记录的状态或添加标记字段来模拟删除操作，从而保留了删除前的数据，便于后续的数据分析和恢复。
+
 **使用场景**：可以进行数据恢复
 
 1. 数据库中创建逻辑删除状态列，设置默认值为0
@@ -125,6 +129,17 @@ private String queryName;
        @TableLogic(value = "0",delval = "1")
        private Integer isDeleted;
    }
+   ```
+
+   全局指定：
+
+   ```yaml
+   mybatis-plus:
+     global-config:
+       db-config:
+         logic-delete-field: deleted # 全局逻辑删除的实体字段名(since 3.3.0,配置后可以忽略不配置步骤2)
+         logic-delete-value: 1 # 逻辑已删除值(默认为 1)
+         logic-not-delete-value: 0 # 逻辑未删除值(默认为 0)
    ```
 
 3. 测试：
