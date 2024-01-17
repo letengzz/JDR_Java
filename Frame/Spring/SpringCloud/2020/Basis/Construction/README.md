@@ -191,7 +191,7 @@
 
 13. 添加数据源信息：
 
-    > application.xml
+    > application.yml
 
     ```yaml
     spring:
