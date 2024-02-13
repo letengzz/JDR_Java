@@ -79,6 +79,8 @@ public class IndexController {
 }
 ```
 
+## 运行项目
+
 当运行起来访问，会自动跳转到默认登陆页面，在运行的时候校验了用户是否已经进行了用户身份认证(默认情况下，会自动生成登陆页，并把url地址重定向到login登陆页)，如果没有进行身份认证。
 
 ![image-20230920181714958](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202402121754725.png)
@@ -94,6 +96,14 @@ public class IndexController {
 点击`Log Out`退出到登录页面：
 
 ![image-20240211191423240](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202402121754186.png)
+
+## 退出登录
+
+当退出时，也可以直接访问：http://localhost:8080/logout 地址，会进入到一个退出登录界面：
+
+![image-20230920183136259](https://cdn.jsdelivr.net/gh/letengzz/tc2@main/img/Java/202309201831588.png)
+
+退出登录后需要重新登录才能访问网站。
 
 ## 常见问题
 
