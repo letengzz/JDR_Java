@@ -2,7 +2,9 @@
 
 认证是网站的第一步，用户需要登录之后才能进入，使用SpringSecurity实现用户登录。
 
-## 基于内存验证
+## 基于内存认证
+
+基于内存验证方式的权限校验存在一定的局限性，只适合快速搭建Demo使用，不适合实际生产环境下编写。
 
 ### 配置登录
 
@@ -44,17 +46,563 @@ public class SecurityConfiguration {
 
 ![image-20230703192441811](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202402121758823.png)
 
-### 退出登录
+### 用户相关操作
 
-当退出时，也可以直接访问：http://localhost:8080/logout 地址，会进入到一个退出登录界面：
+InMemoryUserDetailsManager 实现自 UserDetailsManager 接口，这个接口中有着一套完整的增删改查操作，方便直接对用户进行处理：
 
-![image-20230920183136259](https://cdn.jsdelivr.net/gh/letengzz/tc2@main/img/Java/202309201831588.png)
+```java
+public interface UserDetailsManager extends UserDetailsService {
+	
+  //创建一个新的用户
+	void createUser(UserDetails user);
 
-退出登录后需要重新登录才能访问网站。
+  //更新用户信息
+	void updateUser(UserDetails user);
 
-可以发现，在有了SpringSecurity之后，网站的登录验证模块相当于直接被接管了，因此，从现在开始，网站不需要再自己编写登录模块了，这里我可以直接去掉，只留下主页面。
+  //删除用户
+	void deleteUser(String username);
+
+  //修改用户密码
+	void changePassword(String oldPassword, String newPassword);
+
+  //判断是否存在指定用户
+	boolean userExists(String username);
+}
+```
+
+通过使用UserDetailsManager对象，就能快速执行用户相关的管理操作(增加用户、删除用户、修改用户)。
+
+#### 准备工作
+
+添加依赖：
+
+```xml
+<dependency>
+	<groupId>com.alibaba.fastjson2</groupId>
+	<artifactId>fastjson2</artifactId>
+	<version>2.0.43</version>
+</dependency>
+```
+
+#### 增加用户
+
+编写接口：
+
+> src/main/java/com/hjc/demo/service/UserService.java
+
+```java
+public interface UserService {
+    void addUser(String username, String password);
+}
+```
+
+> src/main/java/com/hjc/demo/service/impl/UserServiceImpl.java
+
+```java
+@Service
+public class UserServiceImpl implements UserService {
+    @Resource
+    private UserDetailsService userDetailsService;
+    @Override
+    public void addUser(String username, String password) {
+        UserDetailsManager manager = (UserDetailsManager) userDetailsService;
+        manager.createUser(User.withDefaultPasswordEncoder()
+                .username(username)
+                .password(password)
+                .roles("ADMIN", "USER")
+                .build());
+    }
+}
+```
+
+创建Controller：
+
+```java
+@Controller
+@RequestMapping("/user")
+public class UserController {
+    @Resource
+    public UserService userService;
+
+    @RequestMapping("/index")
+    public String index() {
+        return "user";
+    }
+
+    @PostMapping("/add")
+    @ResponseBody
+    public JSONObject add(@RequestParam String username,
+                          @RequestParam String password) {
+        userService.addUser(username, password);
+        JSONObject object = new JSONObject();
+        object.put("success", true);
+        return object;
+    }
+
+}
+```
+
+添加添加用户页面：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户相关操作</title>
+    <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+</head>
+<body>
+<div>
+    <label>
+        新建用户：
+        <input type="text" id="username" placeholder="账号"/>
+        <input type="password" id="password" placeholder="密码"/>
+        <input type="text" th:id="${_csrf.getParameterName()}" th:value="${_csrf.token}" hidden>
+    </label>
+    <button onclick="add()">新建用户</button>
+</div>
+</body>
+</html>
+
+<script>
+    function add() {
+        const username = document.getElementById("username").value
+        const password = document.getElementById("password").value
+        const csrf = document.getElementById("_csrf").value
+        axios.post('/user/add', {
+            username: username,
+            password: password,
+            _csrf: csrf
+        }, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        }).then(({data}) => {
+            alert(data.success ? "添加用户成功" : "添加用户失败")
+        })
+    }
+</script>
+```
+
+访问 http://localhost:8080/user/index 添加用户：
+
+![image-20240213182427288](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202402141710798.png)
+
+使用该新建账号登录，发现登录成功。
+
+#### 删除用户
+
+编写接口：
+
+> src/main/java/com/hjc/demo/service/UserService.java
+
+```java
+public interface UserService {
+    void delUser(String username);
+}
+```
+
+> src/main/java/com/hjc/demo/service/impl/UserServiceImpl.java
+
+```java
+@Service
+public class UserServiceImpl implements UserService {
+    @Resource
+    private UserDetailsService userDetailsService;
+    
+    @Override
+    public void delUser(String username) {
+        UserDetailsManager manager = (UserDetailsManager) userDetailsService;
+        manager.deleteUser(username);
+    }
+}
+```
+
+创建Controller：
+
+```java
+@Controller
+@RequestMapping("/user")
+public class UserController {
+    @Resource
+    public UserService userService;
+
+    @RequestMapping("/index")
+    public String index() {
+        return "user";
+    }
+
+    @PostMapping("/del")
+    @ResponseBody
+    public JSONObject del(@RequestParam String username) {
+        userService.delUser(username);
+        JSONObject object = new JSONObject();
+        object.put("success", true);
+        return object;
+    }
+
+}
+```
+
+添加删除用户页面：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户操作</title>
+    <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+</head>
+<body>
+<div>
+    <label>
+        删除用户：
+        <input type="text" id="delname" placeholder="账号"/>
+        <input type="text" th:id="${_csrf.getParameterName()}" th:value="${_csrf.token}" hidden>
+    </label>
+    <button onclick="delUser()">删除用户</button>
+</div>
+</body>
+</html>
+
+<script>
+
+    function delUser() {
+        const username = document.getElementById("delname").value
+        const csrf = document.getElementById("_csrf").value
+        axios.post('/user/del', {
+            username: username,
+            _csrf: csrf
+        }, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        }).then(({data}) => {
+            alert(data.success ? "删除用户成功" : "删除用户失败")
+        })
+    }
+</script>
+```
+
+#### 更新用户
+
+编写接口：
+
+> src/main/java/com/hjc/demo/service/UserService.java
+
+```java
+public interface UserService {
+    boolean  updateUser(String username, String password);
+}
+```
+
+> src/main/java/com/hjc/demo/service/impl/UserServiceImpl.java
+
+```java
+@Service
+public class UserServiceImpl implements UserService {
+    @Resource
+    private UserDetailsService userDetailsService;
+
+    @Override
+    public boolean updateUser(String username, String password) {
+        UserDetailsManager manager = (UserDetailsManager) userDetailsService;
+        try {
+            manager.updateUser(
+                    User.withDefaultPasswordEncoder()
+                            .username(username) //自定义用户名
+                            .password(password) //自定义密码
+                            .roles("USER")  //自定义角色
+                            .build()
+            );
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+}
+```
+
+创建Controller：
+
+```java
+@Controller
+@RequestMapping("/user")
+public class UserController {
+    @Resource
+    public UserService userService;
+
+    @RequestMapping("/index")
+    public String index() {
+        return "user";
+    }
+
+    @PostMapping("/update")
+    @ResponseBody
+    public JSONObject update(@RequestParam String username,
+                             @RequestParam String password) {
+
+        JSONObject object = new JSONObject();
+        if (userService.updateUser(username, password)) {
+            object.put("success", true);
+        }else {
+            object.put("success", false);
+        }
+        return object;
+    }
+}
+```
+
+添加更新用户页面：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户操作</title>
+    <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+</head>
+<body>
+<div>
+    <label>
+        修改用户：
+        <input type="text" id="updateName" placeholder="用户名"/>
+        <input type="text" id="updatePassword" placeholder="新密码"/>
+        <input type="text" th:id="${_csrf.getParameterName()}" th:value="${_csrf.token}" hidden>
+    </label>
+    <button onclick="update()">修改用户信息</button>
+</div>
+</body>
+</html>
+
+<script>
+    function update() {
+        const username = document.getElementById("updateName").value
+        const password = document.getElementById("updatePassword").value
+        const csrf = document.getElementById("_csrf").value
+        axios.post('/user/update', {
+            username: username,
+            password: password,
+            _csrf: csrf
+        }, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        }).then(({data}) => {
+            alert(data.success ? "修改用户成功" : "修改用户失败")
+        })
+    }
+</script>
+```
+
+#### 重置用户密码
+
+编写接口：
+
+> src/main/java/com/hjc/demo/service/UserService.java
+
+```java
+public interface UserService {
+	void  updatePass( String oldPassword,String newPassword);
+}
+```
+
+> src/main/java/com/hjc/demo/service/impl/UserServiceImpl.java
+
+```java
+@Service
+public class UserServiceImpl implements UserService {
+    @Resource
+    private UserDetailsService userDetailsService;
+    
+    @Override
+    public void updatePass(String oldPassword, String newPassword) {
+        UserDetailsManager manager = (UserDetailsManager) userDetailsService;
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        manager.changePassword(oldPassword, "{bcrypt}" + encoder.encode(newPassword));
+    }
+
+}
+```
+
+创建Controller：
+
+```java
+@Controller
+@RequestMapping("/user")
+public class UserController {
+    @Resource
+    public UserService userService;
+
+    @RequestMapping("/index")
+    public String index() {
+        return "user";
+    }
+
+    @PostMapping("/updatePass")
+    @ResponseBody
+    public JSONObject updatePass(@RequestParam String oldPassword,
+                                 @RequestParam String newPassword) {
+
+        userService.updatePass(oldPassword, newPassword);
+        JSONObject object = new JSONObject();
+        object.put("success", true);
+        return object;
+    }
+
+}
+```
+
+添加重置用户密码页面：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户操作</title>
+    <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+</head>
+<body>
+<div>
+    <label>
+        修改用户密码：
+        <input type="text" id="oldPassword" placeholder="旧密码"/>
+        <input type="text" id="newPassword" placeholder="新密码"/>
+        <input type="text" th:id="${_csrf.getParameterName()}" th:value="${_csrf.token}" hidden>
+    </label>
+    <button onclick="updatePass()">修改用户密码</button>
+</div>
+</body>
+</html>
+
+<script>
+
+    function updatePass() {
+        const oldPassword = document.getElementById("oldPassword").value
+        const newPassword = document.getElementById("newPassword").value
+        const csrf = document.getElementById("_csrf").value
+        axios.post('/user/updatePass', {
+            oldPassword: oldPassword,
+            newPassword: newPassword,
+            _csrf: csrf
+        }, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        }).then(({data}) => {
+            alert(data.success ? "更新用户密码成功" : "更新用户密码失败")
+        })
+    }
+</script>
+```
+
+#### 判断是否存在指定用户
+
+编写接口：
+
+> src/main/java/com/hjc/demo/service/UserService.java
+
+```java
+public interface UserService {
+    boolean existsUser(String username);
+}
+```
+
+> src/main/java/com/hjc/demo/service/impl/UserServiceImpl.java
+
+```java
+@Service
+public class UserServiceImpl implements UserService {
+    @Resource
+    private UserDetailsService userDetailsService;
+    
+    @Override
+    public boolean existsUser(String username) {
+        UserDetailsManager manager = (UserDetailsManager) userDetailsService;
+        return manager.userExists(username);
+    }
+}
+```
+
+创建Controller：
+
+```java
+@Controller
+@RequestMapping("/user")
+public class UserController {
+    @Resource
+    public UserService userService;
+
+    @RequestMapping("/index")
+    public String index() {
+        return "user";
+    }
+
+    @PostMapping("/exists")
+    @ResponseBody
+    public JSONObject exists(@RequestParam String username) {
+        JSONObject object = new JSONObject();
+        if (userService.existsUser(username)) {
+            object.put("success", true);
+        }else {
+            object.put("success", false);
+        }
+        return object;
+    }
+
+}
+```
+
+添加判断用户存在页面：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>新建用户</title>
+    <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+</head>
+<body>
+<div>
+    <label>
+        判断用户是否存在：
+        <input type="text" id="existsUsername" placeholder="账号"/>
+        <input type="text" th:id="${_csrf.getParameterName()}" th:value="${_csrf.token}" hidden>
+    </label>
+    <button onclick="existsUser()">判断用户是否存在</button>
+</div>
+</body>
+</html>
+
+<script>
+
+    function existsUser() {
+        const existsUsername = document.getElementById("existsUsername").value
+        const csrf = document.getElementById("_csrf").value
+        axios.post('/user/exists', {
+            username: existsUsername,
+            _csrf: csrf
+        }, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        }).then(({data}) => {
+            alert(data.success ? "该用户存在" : "该用户不存在")
+        })
+    }
+</script>
+```
 
 ## 基于数据库验证
+
+基于数据库验证方式权限校验虽然能够直接使用数据库，但是存在一定的局限性，只适合快速搭建Demo使用，不适合实际生产环境下编写。
+
+### 配置登录
 
 官方默认提供了可以直接使用的用户和权限表设计，根本不需要来建表，直接在Navicat中执行以下查询：
 
@@ -139,7 +687,9 @@ public class SecurityConfiguration {
 
 当下次需要快速创建一个用户登录的应用程序时，直接使用这种方式就能快速完成了。
 
-无论是InMemoryUserDetailsManager还是JdbcUserDetailsManager，都是实现自UserDetailsManager接口，这个接口中有着一套完整的增删改查操作，方便直接对用户进行处理：
+### 用户相关操作
+
+JdbcUserDetailsManager 实现自 UserDetailsManager 接口，这个接口中有着一套完整的增删改查操作，方便直接对用户进行处理：
 
 ```java
 public interface UserDetailsManager extends UserDetailsService {
@@ -161,111 +711,559 @@ public interface UserDetailsManager extends UserDetailsService {
 }
 ```
 
-通过使用UserDetailsManager对象，就能快速执行用户相关的管理操作，比如可以直接在网站上添加一个快速重置密码的接口：
+通过使用 UserDetailsManager 对象，就能快速执行用户相关的管理操作(增加用户、删除用户、修改用户)。
 
-1. 首先需要配置一下JdbcUserDetailsManager，为其添加一个AuthenticationManager用于原密码的校验：
+#### 准备工作
 
-   ```java
-   @Configuration
-   @EnableWebSecurity
-   public class SecurityConfiguration {
-   
-       ...
-   
-       //手动创建一个AuthenticationManager用于处理密码校验
-       private AuthenticationManager authenticationManager(UserDetailsManager manager,
-                                                           PasswordEncoder encoder){
-           DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-           provider.setUserDetailsService(manager);
-           provider.setPasswordEncoder(encoder);
-           return new ProviderManager(provider);
-       }
-   
-       @Bean
-       public UserDetailsManager userDetailsService(DataSource dataSource,
-                                                    PasswordEncoder encoder) throws Exception {
-           JdbcUserDetailsManager manager = new JdbcUserDetailsManager(dataSource);
-         	//为UserDetailsManager设置AuthenticationManager即可开启重置密码的时的校验
-           manager.setAuthenticationManager(authenticationManager(manager, encoder));
-           return manager;
-       }
-   }
-   ```
+需要配置一下JdbcUserDetailsManager，为其添加一个AuthenticationManager 用于原密码的校验：
 
-2. 编写一个快速重置密码的接口：
+```java
+@Configuration
+@EnableWebSecurity
+public class SecurityConfiguration {
 
-   ```java
-   @Resource
-   private UserDetailsManager manager;
-   
-   @Resource
-   private PasswordEncoder encoder;
-   
-   @ResponseBody
-   @PostMapping("/change-password")
-   public JSONObject changePassword(@RequestParam String oldPassword,
-                                    @RequestParam String newPassword) {
-       manager.changePassword(oldPassword, encoder.encode(newPassword));
-       JSONObject object = new JSONObject();
-       object.put("success", true);
-       return object;
-   }
-   ```
+    @Bean
+    PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
-3. 在主界面中添加一个重置密码的操作：
+    //手动创建一个AuthenticationManager用于处理密码校验
+    private AuthenticationManager authenticationManager(UserDetailsManager manager,
+                                                        PasswordEncoder encoder) {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(manager);
+        provider.setPasswordEncoder(encoder);
+        return new ProviderManager(provider);
+    }
 
-   ```html
-   <!DOCTYPE html>
-   <html lang="en">
-   <head>
-       <meta charset="UTF-8">
-       <title>首页</title>
-       <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
-   </head>
-   <body>
-   <div>
-       <label>
-           修改密码：
-           <input type="text" id="oldPassword" placeholder="旧密码"/>
-           <input type="text" id="newPassword" placeholder="新密码"/>
-           <input type="text" th:id="${_csrf.getParameterName()}" th:value="${_csrf.token}" hidden>
-       </label>
-       <button onclick="change()">修改密码</button>
-   </div>
-   </body>
-   </html>
-   
-   <script>
-       function change() {
-           const oldPassword = document.getElementById("oldPassword").value
-           const newPassword = document.getElementById("newPassword").value
-           const csrf = document.getElementById("_csrf").value
-           axios.post('/change-password', {
-               oldPassword: oldPassword,
-               newPassword: newPassword,
-               _csrf: csrf
-           }, {
-               headers: {
-                   'Content-Type': 'application/x-www-form-urlencoded'
-               }
-           }).then(({data}) => {
-               alert(data.success ? "密码修改成功" : "密码修改失败，请检查原密码是否正确")
-           })
-       }
-   </script>
-   ```
+    @Bean
+    public UserDetailsManager userDetailsService(DataSource dataSource,
+                                                 PasswordEncoder encoder) throws Exception {
+        JdbcUserDetailsManager manager = new JdbcUserDetailsManager(dataSource);
+        //为UserDetailsManager设置AuthenticationManager即可开启重置密码的时的校验
+        manager.setAuthenticationManager(authenticationManager(manager, encoder));
+        return manager;
+    }
+}
+```
 
-这样就可以在首页进行修改密码操作了：
+#### 增加用户
 
-![image-20240212101910122](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202402121756785.png)
+编写接口：
 
-当然，这种方式的权限校验虽然能够直接使用数据库，但是存在一定的局限性，只适合快速搭建Demo使用，不适合实际生产环境下编写。
+> src/main/java/com/hjc/demo/service/UserService.java
+
+```java
+public interface UserService {
+    void addUser(String username, String password);
+}
+```
+
+> src/main/java/com/hjc/demo/service/impl/UserServiceImpl.java
+
+```java
+@Service
+public class UserServiceImpl implements UserService {
+    @Resource
+    private UserDetailsManager manager;
+
+    @Resource
+    private PasswordEncoder encoder;
+
+    @Override
+    public void addUser(String username, String password) {
+        manager.createUser(User.withUsername(username)
+                .password(encoder.encode(password)).roles("USER").build());
+    }
+}
+```
+
+创建Controller：
+
+```java
+@Controller
+@RequestMapping("/user")
+public class UserController {
+    @Resource
+    public UserService userService;
+
+    @RequestMapping("/index")
+    public String index() {
+        return "user";
+    }
+
+    @PostMapping("/add")
+    @ResponseBody
+    public JSONObject add(@RequestParam String username,
+                          @RequestParam String password) {
+        userService.addUser(username, password);
+        JSONObject object = new JSONObject();
+        object.put("success", true);
+        return object;
+    }
+
+}
+```
+
+添加添加用户页面：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户相关操作</title>
+    <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+</head>
+<body>
+<div>
+    <label>
+        新建用户：
+        <input type="text" id="username" placeholder="账号"/>
+        <input type="password" id="password" placeholder="密码"/>
+        <input type="text" th:id="${_csrf.getParameterName()}" th:value="${_csrf.token}" hidden>
+    </label>
+    <button onclick="add()">新建用户</button>
+</div>
+</body>
+</html>
+
+<script>
+    function add() {
+        const username = document.getElementById("username").value
+        const password = document.getElementById("password").value
+        const csrf = document.getElementById("_csrf").value
+        axios.post('/user/add', {
+            username: username,
+            password: password,
+            _csrf: csrf
+        }, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        }).then(({data}) => {
+            alert(data.success ? "添加用户成功" : "添加用户失败")
+        })
+    }
+</script>
+```
+
+访问 http://localhost:8080/user/index 添加用户：
+
+![image-20240213182427288](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202402141711500.png)
+
+使用该新建账号登录，发现登录成功。
+
+#### 删除用户
+
+编写接口：
+
+> src/main/java/com/hjc/demo/service/UserService.java
+
+```java
+public interface UserService {
+    void delUser(String username);
+}
+```
+
+> src/main/java/com/hjc/demo/service/impl/UserServiceImpl.java
+
+```java
+@Service
+public class UserServiceImpl implements UserService {
+    @Resource
+    private UserDetailsManager manager;
+    
+    @Override
+    public void delUser(String username) {
+        manager.deleteUser(username);
+    }
+}
+```
+
+创建Controller：
+
+```java
+@Controller
+@RequestMapping("/user")
+public class UserController {
+    @Resource
+    public UserService userService;
+
+    @RequestMapping("/index")
+    public String index() {
+        return "user";
+    }
+
+    @PostMapping("/del")
+    @ResponseBody
+    public JSONObject del(@RequestParam String username) {
+        userService.delUser(username);
+        JSONObject object = new JSONObject();
+        object.put("success", true);
+        return object;
+    }
+
+}
+```
+
+添加删除用户页面：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户相关操作</title>
+    <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+</head>
+<body>
+<div>
+    <label>
+        删除用户：
+        <input type="text" id="delname" placeholder="账号"/>
+        <input type="text" th:id="${_csrf.getParameterName()}" th:value="${_csrf.token}" hidden>
+    </label>
+    <button onclick="delUser()">删除用户</button>
+</div>
+</body>
+</html>
+
+<script>
+
+    function delUser() {
+        const username = document.getElementById("delname").value
+        const csrf = document.getElementById("_csrf").value
+        axios.post('/user/del', {
+            username: username,
+            _csrf: csrf
+        }, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        }).then(({data}) => {
+            alert(data.success ? "删除用户成功" : "删除用户失败")
+        })
+    }
+</script>
+```
+
+#### 更新用户
+
+编写接口：
+
+> src/main/java/com/hjc/demo/service/UserService.java
+
+```java
+public interface UserService {
+    boolean  updateUser(String username, String password);
+}
+```
+
+> src/main/java/com/hjc/demo/service/impl/UserServiceImpl.java
+
+```java
+@Service
+public class UserServiceImpl implements UserService {
+    @Resource
+    private UserDetailsManager manager;
+
+    @Resource
+    private PasswordEncoder encoder;
+
+    @Override
+    public boolean updateUser(String username, String password) {
+        try {
+            manager.updateUser(User.withUsername(username)
+                    .password(encoder.encode(password))
+                    .authorities("ROLE_ADMIN")
+                    .build());
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+}
+```
+
+创建Controller：
+
+```java
+@Controller
+@RequestMapping("/user")
+public class UserController {
+    @Resource
+    public UserService userService;
+
+    @RequestMapping("/index")
+    public String index() {
+        return "user";
+    }
+
+    @PostMapping("/update")
+    @ResponseBody
+    public JSONObject update(@RequestParam String username,
+                             @RequestParam String password) {
+
+        JSONObject object = new JSONObject();
+        if (userService.updateUser(username, password)) {
+            object.put("success", true);
+        }else {
+            object.put("success", false);
+        }
+        return object;
+    }
+}
+```
+
+添加更新用户页面：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户相关操作</title>
+    <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+</head>
+<body>
+<div>
+    <label>
+        修改用户：
+        <input type="text" id="updateName" placeholder="用户名"/>
+        <input type="text" id="updatePassword" placeholder="新密码"/>
+        <input type="text" th:id="${_csrf.getParameterName()}" th:value="${_csrf.token}" hidden>
+    </label>
+    <button onclick="update()">修改用户信息</button>
+</div>
+</body>
+</html>
+
+<script>
+    function update() {
+        const username = document.getElementById("updateName").value
+        const password = document.getElementById("updatePassword").value
+        const csrf = document.getElementById("_csrf").value
+        axios.post('/user/update', {
+            username: username,
+            password: password,
+            _csrf: csrf
+        }, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        }).then(({data}) => {
+            alert(data.success ? "修改用户成功" : "修改用户失败")
+        })
+    }
+</script>
+```
+
+#### 重置用户密码
+
+编写接口：
+
+> src/main/java/com/hjc/demo/service/UserService.java
+
+```java
+public interface UserService {
+	void  updatePass( String oldPassword,String newPassword);
+}
+```
+
+> src/main/java/com/hjc/demo/service/impl/UserServiceImpl.java
+
+```java
+@Service
+public class UserServiceImpl implements UserService {
+    @Resource
+    private UserDetailsManager manager;
+
+    @Resource
+    private PasswordEncoder encoder;
+    
+    @Override
+    public void updatePass(String oldPassword, String newPassword) {
+        manager.changePassword(oldPassword, encoder.encode(newPassword));
+    }
+}
+```
+
+创建Controller：
+
+```java
+@Controller
+@RequestMapping("/user")
+public class UserController {
+    @Resource
+    public UserService userService;
+
+    @RequestMapping("/index")
+    public String index() {
+        return "user";
+    }
+    @PostMapping("/updatePass")
+    @ResponseBody
+    public JSONObject updatePass(@RequestParam String oldPassword,
+                                 @RequestParam String newPassword) {
+
+        userService.updatePass(oldPassword, newPassword);
+        JSONObject object = new JSONObject();
+        object.put("success", true);
+        return object;
+    }
+}
+```
+
+添加重置用户密码页面：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户相关操作</title>
+    <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+</head>
+<body>
+<div>
+    <label>
+        修改用户密码：
+        <input type="text" id="oldPassword" placeholder="旧密码"/>
+        <input type="text" id="newPassword" placeholder="新密码"/>
+        <input type="text" th:id="${_csrf.getParameterName()}" th:value="${_csrf.token}" hidden>
+    </label>
+    <button onclick="updatePass()">修改用户密码</button>
+</div>
+</body>
+</html>
+
+<script>
+
+    function updatePass() {
+        const oldPassword = document.getElementById("oldPassword").value
+        const newPassword = document.getElementById("newPassword").value
+        const csrf = document.getElementById("_csrf").value
+        axios.post('/user/updatePass', {
+            oldPassword: oldPassword,
+            newPassword: newPassword,
+            _csrf: csrf
+        }, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        }).then(({data}) => {
+            alert(data.success ? "更新用户密码成功" : "更新用户密码失败")
+        })
+    }
+</script>
+```
+
+#### 判断是否存在指定用户
+
+编写接口：
+
+> src/main/java/com/hjc/demo/service/UserService.java
+
+```java
+public interface UserService {
+    boolean existsUser(String username);
+}
+```
+
+> src/main/java/com/hjc/demo/service/impl/UserServiceImpl.java
+
+```java
+@Service
+public class UserServiceImpl implements UserService {
+    @Resource
+    private UserDetailsManager manager;
+
+    @Resource
+    private PasswordEncoder encoder;
+    
+    @Override
+    public boolean existsUser(String username) {
+        return manager.userExists(username);
+    }
+}
+```
+
+创建Controller：
+
+```java
+@Controller
+@RequestMapping("/user")
+public class UserController {
+    @Resource
+    public UserService userService;
+
+    @RequestMapping("/index")
+    public String index() {
+        return "user";
+    }
+
+    @PostMapping("/exists")
+    @ResponseBody
+    public JSONObject exists(@RequestParam String username) {
+        JSONObject object = new JSONObject();
+        if (userService.existsUser(username)) {
+            object.put("success", true);
+        }else {
+            object.put("success", false);
+        }
+        return object;
+    }
+
+}
+```
+
+添加判断用户存在页面：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>新建用户</title>
+    <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+</head>
+<body>
+<div>
+    <label>
+        判断用户是否存在：
+        <input type="text" id="existsUsername" placeholder="账号"/>
+        <input type="text" th:id="${_csrf.getParameterName()}" th:value="${_csrf.token}" hidden>
+    </label>
+    <button onclick="existsUser()">判断用户是否存在</button>
+</div>
+</body>
+</html>
+
+<script>
+
+    function existsUser() {
+        const existsUsername = document.getElementById("existsUsername").value
+        const csrf = document.getElementById("_csrf").value
+        axios.post('/user/exists', {
+            username: existsUsername,
+            _csrf: csrf
+        }, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        }).then(({data}) => {
+            alert(data.success ? "该用户存在" : "该用户不存在")
+        })
+    }
+</script>
+```
 
 ## 自定义验证
 
 有些时候，数据库可能并不会像SpringSecurity默认的那样进行设计，而是采用自定义的表结构，这种情况下，上面两种方式就很难进行验证了，此时需要编写自定义验证，来应对各种任意变化的情况。
 
-既然需要自定义，那么就需要自行实现UserDetailsService或是功能更完善的UserDetailsManager接口。
+既然需要自定义，那么就需要自行实现UserDetailsService或是功能更完善的UserDetailsManager接口及实现类。
 
 ### 准备工作
 
@@ -459,7 +1457,7 @@ public class AuthorizeService implements UserDetailsService {
 
 ### 实现 DBUserDetailsManager
 
-也可以选择DBUserDetailsManager进行实现：
+可以选择DBUserDetailsManager进行实现：
 
 ```java
 @Component
@@ -524,11 +1522,147 @@ public class DBUserDetailsManager implements UserDetailsManager, UserDetailsPass
 
 ![image-20240212142358194](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202402121757083.png)
 
+#### 添加用户
+
+Service 添加方法：
+
+> src/main/java/com/hjc/demo/service/UserService.java
+
+```java
+public interface UserService extends IService<User> {
+    void saveUserDetails(String username, String password);
+}
+```
+
+> src/main/java/com/hjc/demo/service/impl/UserServiceImpl.java
+
+```java
+@Service
+public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements UserService {
+    @Resource
+    private DBUserDetailsManager dbUserDetailsManager;
+
+    @Override
+    public void saveUserDetails(String username, String password) {
+        UserDetails userDetails = org.springframework.security.core.userdetails.User
+                .withDefaultPasswordEncoder()
+                .username(username) //自定义用户名
+                .password(password) //自定义密码
+                .build();
+        dbUserDetailsManager.createUser(userDetails);
+    }
+}
+```
+
+> src/main/java/com/hjc/demo/controller/UserController.java
+
+```java
+@Controller
+@RequestMapping("/user")
+public class UserController {
+
+    @Resource
+    public UserService userService;
+
+    @RequestMapping("/index")
+    public String index() {
+        return "user";
+    }
+    
+    /**
+     * 添加用户
+     * @param user 用户信息
+     */
+    @PostMapping("/add")
+    @ResponseBody
+    public JSONObject add(@RequestParam String username,
+                      @RequestParam String password){
+        userService.saveUserDetails(username,password);
+        JSONObject object = new JSONObject();
+        object.put("success", true);
+        return object;
+    }
+}
+```
+
+修改配置DBUserDetailsManager中添加方法：
+
+```java
+@Component
+public class DBUserDetailsManager implements UserDetailsManager, UserDetailsPasswordService {
+
+    @Resource
+    private UserMapper mapper;
+
+	...
+
+    @Override
+    public void createUser(UserDetails userDetails) {
+        User user = new User();
+        user.setUsername(userDetails.getUsername());
+        user.setPassword(userDetails.getPassword());
+        user.setEnabled(userDetails.isEnabled());
+        mapper.insert(user);
+    }
+
+    ...
+}
+```
+
+添加添加用户页面：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户相关操作</title>
+    <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+</head>
+<body>
+<div>
+    <label>
+        新建用户：
+        <input type="text" id="username" placeholder="账号"/>
+        <input type="password" id="password" placeholder="密码"/>
+        <input type="text" th:id="${_csrf.getParameterName()}" th:value="${_csrf.token}" hidden>
+    </label>
+    <button onclick="add()">新建用户</button>
+</div>
+</body>
+</html>
+
+<script>
+    function add() {
+        const username = document.getElementById("username").value
+        const password = document.getElementById("password").value
+        const csrf = document.getElementById("_csrf").value
+        axios.post('/user/add', {
+            username: username,
+            password: password,
+            _csrf: csrf
+        }, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        }).then(({data}) => {
+            alert(data.success ? "添加用户成功" : "添加用户失败")
+        })
+    }
+</script>
+```
+
+访问 http://localhost:8080/user/index 添加用户：
+
+![image-20240213182427288](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202402141711068.png)
+
+退出登录并使用`zhangsan`账号进行登录，发现可以登录成功。
+
 ### 用户认证流程
 
 - 程序启动时：
   - 创建`DBUserDetailsManager`类，实现接口 UserDetailsManager, UserDetailsPasswordService
   - 在应用程序中初始化这个类的对象
 - 校验用户时：
-  - SpringSecurity自动使用`DBUserDetailsManager`的`loadUserByUsername`方法从`数据库中`获取User对象
+  - SpringSecurity自动使用`DBUserDetailsManager`的`loadUserByUsername`方法从**数据库中**获取User对象
   - 在`UsernamePasswordAuthenticationFilter`过滤器中的`attemptAuthentication`方法中将用户输入的用户名密码和从数据库中获取到的用户信息进行比较，进行用户认证
