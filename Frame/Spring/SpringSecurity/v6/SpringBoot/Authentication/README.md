@@ -1666,3 +1666,181 @@ public class DBUserDetailsManager implements UserDetailsManager, UserDetailsPass
 - 校验用户时：
   - SpringSecurity自动使用`DBUserDetailsManager`的`loadUserByUsername`方法从**数据库中**获取User对象
   - 在`UsernamePasswordAuthenticationFilter`过滤器中的`attemptAuthentication`方法中将用户输入的用户名密码和从数据库中获取到的用户信息进行比较，进行用户认证
+
+## 前后端分离
+
+在前后端分离的架构中，前端向后端发起请求，后端给前端返回的需要是JSON数据，所以在用户认证流程中，需要将用户登录成功或失败的JSON数据返回给前端，再由前端根据返回的JSON数据进行处理。
+
+### 用户认证流程
+
+在SecurityFilterChain过滤器链中的UsernamePasswordAuthenticationFilter 专门处理用户认证流程的过滤器。这个过滤器首先先接收用户在浏览器中输入的用户名和密码，然后再用这个用户名和密码生成一个UsernamePasswordAuthenticationToken对象，把这个对象交给AuthenticationManager去做用户认证工作，当认证成功，经过一系列的处理最终到达：AuthenticationSuccessHandler(**处理用户认证成功之后返回信息的类**)，同样用户认证失败会到达：AuthenticationFailureHandler(**处理用户认证失败之后返回信息的类**)
+
+![usernamepasswordauthenticationfilter](assets/usernamepasswordauthenticationfilter-16822329079281.png)
+
+### 引入fastjson
+
+引入处理JSON工具类：FastJSON2
+
+```xml
+<dependency>
+    <groupId>com.alibaba.fastjson2</groupId>
+    <artifactId>fastjson2</artifactId>
+    <version>2.0.37</version>
+</dependency>
+```
+
+### 认证成功的响应
+
+成功结果处理：
+
+```java
+public class MyAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
+    @Override
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+
+        //获取用户身份信息
+        Object principal = authentication.getPrincipal();
+
+        //创建结果对象
+        HashMap result = new HashMap();
+        result.put("code", 0);
+        result.put("message", "登录成功");
+        result.put("data", principal);
+
+        //转换成json字符串
+        String json = JSON.toJSONString(result);
+
+        //返回响应
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().println(json);
+    }
+}
+```
+
+SecurityFilterChain配置：
+
+```java
+form.successHandler(new MyAuthenticationSuccessHandler()) //认证成功时的处理
+```
+
+### 认证失败响应
+
+失败结果处理：
+
+```java
+public class MyAuthenticationFailureHandler implements AuthenticationFailureHandler {
+
+    @Override
+    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
+
+        //获取错误信息
+        String localizedMessage = exception.getLocalizedMessage();
+
+        //创建结果对象
+        HashMap result = new HashMap();
+        result.put("code", -1);
+        result.put("message", localizedMessage);
+
+        //转换成json字符串
+        String json = JSON.toJSONString(result);
+
+        //返回响应
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().println(json);
+    }
+}
+```
+
+SecurityFilterChain配置：
+
+```java
+form.failureHandler(new MyAuthenticationFailureHandler()) //认证失败时的处理
+```
+
+### 注销响应
+
+注销结果处理：
+
+```java
+public class MyLogoutSuccessHandler implements LogoutSuccessHandler {
+
+    @Override
+    public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+
+        //创建结果对象
+        HashMap result = new HashMap();
+        result.put("code", 0);
+        result.put("message", "注销成功");
+
+        //转换成json字符串
+        String json = JSON.toJSONString(result);
+
+        //返回响应
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().println(json);
+    }
+}
+```
+
+SecurityFilterChain配置
+
+```java
+http.logout(logout -> {
+    logout.logoutSuccessHandler(new MyLogoutSuccessHandler()); //注销成功时的处理
+});
+```
+
+### 请求未认证的接口
+
+当访问一个需要认证之后才能访问的接口的时候，Spring Security会使用`AuthenticationEntryPoint`将用户请求跳转到登录页面，要求用户提供登录凭证。
+
+官方说明：[Servlet Authentication Architecture :: Spring Security](https://docs.spring.io/spring-security/reference/servlet/authentication/architecture.html)
+
+实现AuthenticationEntryPoint接口：
+
+这里也希望系统**返回json结果**，因此我们定义类实现AuthenticationEntryPoint接口：
+
+```java
+public class MyAuthenticationEntryPoint implements AuthenticationEntryPoint {
+    @Override
+    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
+
+        //获取错误信息
+        //String localizedMessage = authException.getLocalizedMessage();
+
+        //创建结果对象
+        HashMap result = new HashMap();
+        result.put("code", -1);
+        result.put("message", "需要登录");
+
+        //转换成json字符串
+        String json = JSON.toJSONString(result);
+
+        //返回响应
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().println(json);
+    }
+}
+```
+
+SecurityFilterChain配置：
+
+```java
+//错误处理
+http.exceptionHandling(exception  -> {
+    exception.authenticationEntryPoint(new MyAuthenticationEntryPoint());//请求未认证的接口
+});
+```
+
+### 跨域
+
+跨域全称是跨域资源共享(`Cross-Origin Resources Sharing`，`CORS`)，它是浏览器的保护机制，只允许网页请求统一域名下的服务，同一域名指=>协议、域名、端口号都要保持一致，如果有一项不同，那么就是跨域请求。在前后端分离的项目中，需要解决跨域的问题。
+
+
+在SpringSecurity中解决跨域很简单，在配置文件中添加如下配置即可：
+
+```java
+//跨域
+http.cors(withDefaults());
+```
+
