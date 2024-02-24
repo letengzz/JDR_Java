@@ -241,7 +241,7 @@ public class SecurityConfiguration {
 
 下载好模版将其中的两个页面和资源文件放到resource路径下：
 
-![image-20240214203737155](assets/image-20240214203737155.png)
+![image-20240214203737155](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202402241548026.png)
 
 设置静态资源访问路径：
 
@@ -270,7 +270,7 @@ public class HelloController {
 
 在登录之后，就可以展示前端模版页面了：
 
-![image-20240214203653899](assets/image-20240214203653899.png)
+![image-20240214203653899](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202402241550384.png)
 
 不过现在依然是默认进入到SpringSecurity默认的登录界面，需要配置自定义的登录界面，将前端模版中的登录页面作为SpringSecurity的默认登录界面。
 
@@ -308,11 +308,11 @@ public class SecurityConfiguration {
 
 需要配置登陆页面的地址和登陆请求发送的地址，这里登陆页面填写为`/login`，登陆请求地址为`/doLogin`，登陆页面我们刚刚已经自己编写Controller来实现了，登陆请求提交处理由SpringSecurity提供，只需要写路径就可以了。现在访问我们的网站，就可以进入到自定义的登录界面了：
 
-![image-20240214204242509](assets/image-20240214204242509.png)
+![image-20240214204242509](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202402241551070.png)
 
 但是页面只有一个纯文本，这是因为在获取静态资源的时候，所有的静态资源默认情况下也会被拦截，因此全部被302重定向到登录页面，这显然是不对的：
 
-![image-20230703184641792](https://s2.loli.net/2023/07/03/6vXlPZprzjJLEeq.png)
+![image-20230703184641792](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202402241551907.png)
 
 因此，需要将所有的静态资源也给放行，否则登录界面都没法正常展示：
 
@@ -325,11 +325,11 @@ public class SecurityConfiguration {
 
 更改静态资源路径：
 
-![image-20240214204903953](assets/image-20240214204903953.png)
+![image-20240214204903953](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202402241551010.png)
 
 再次访问网站，就可以看到正常显示的登录界面了：
 
-![image-20230703185027927](https://s2.loli.net/2023/07/03/LmZbihzD4vYB5GF.png)
+![image-20230703185027927](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202402241551037.png)
 
 因此，在编写项目过程中发现有302的情况，一定要先检查是否因为没有放行导致被SpringSecurity给拦截。
 
@@ -352,7 +352,7 @@ public class SecurityConfiguration {
 
 接着就可以尝试进行登录操作了：
 
-![image-20230703185916404](https://s2.loli.net/2023/07/03/P2LS8uNRQ64WEvT.png)
+![image-20230703185916404](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202402241552038.png)
 
 可以看到，现在可以成功地登录到主页了。
 
@@ -395,7 +395,7 @@ public class SecurityConfiguration {
 
 现在点击右上角的退出按钮就可以退出了：
 
-![image-20230703190714519](https://s2.loli.net/2023/07/03/yM8TOAxYPf3iqFs.png)
+![image-20230703190714519](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202402241552802.png)
 
 现在无论提交什么请求都需要Csrf校验，有些太麻烦了，实际上现在浏览器已经很安全了，没必要防御到这种程度，可以直接在配置中关闭csrf校验：
 
@@ -503,7 +503,7 @@ public SecurityFilterChain filterChain(HttpSecurity http,PersistentTokenReposito
 
 这样，就成功配置了数据库持久化存储记住我信息，即使重启服务器也不会导致数据丢失。当登录之后，数据库中会自动记录相关的信息：
 
-![image-20240214220901417](assets/image-20240214220901417.png)
+![image-20240214220901417](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202402241555985.png)
 
 这样，网站的登录系统就更加完善了。
 
