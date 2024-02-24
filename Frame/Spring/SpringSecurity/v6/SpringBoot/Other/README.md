@@ -562,7 +562,7 @@ public class IndexController {
 
 后登录的账号会使先登录的账号失效
 
-### 实现处理器接口
+**实现处理器接口**：
 
 实现接口SessionInformationExpiredStrategy
 
@@ -587,7 +587,7 @@ public class MySessionInformationExpiredStrategy implements SessionInformationEx
 }
 ```
 
-### SecurityFilterChain配置
+**SecurityFilterChain配置**：
 
 ```java
 //会话管理
