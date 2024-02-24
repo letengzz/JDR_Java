@@ -1675,7 +1675,7 @@ public class DBUserDetailsManager implements UserDetailsManager, UserDetailsPass
 
 在SecurityFilterChain过滤器链中的UsernamePasswordAuthenticationFilter 专门处理用户认证流程的过滤器。这个过滤器首先先接收用户在浏览器中输入的用户名和密码，然后再用这个用户名和密码生成一个UsernamePasswordAuthenticationToken对象，把这个对象交给AuthenticationManager去做用户认证工作，当认证成功，经过一系列的处理最终到达：AuthenticationSuccessHandler(**处理用户认证成功之后返回信息的类**)，同样用户认证失败会到达：AuthenticationFailureHandler(**处理用户认证失败之后返回信息的类**)
 
-![usernamepasswordauthenticationfilter](assets/usernamepasswordauthenticationfilter-16822329079281.png)
+![usernamepasswordauthenticationfilter](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202402241103853.png)
 
 ### 引入fastjson
 
@@ -1691,7 +1691,7 @@ public class DBUserDetailsManager implements UserDetailsManager, UserDetailsPass
 
 ### 认证成功的响应
 
-成功结果处理：
+**成功结果处理**：
 
 ```java
 public class MyAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
@@ -1717,7 +1717,7 @@ public class MyAuthenticationSuccessHandler implements AuthenticationSuccessHand
 }
 ```
 
-SecurityFilterChain配置：
+**SecurityFilterChain配置**：
 
 ```java
 form.successHandler(new MyAuthenticationSuccessHandler()) //认证成功时的处理
@@ -1725,7 +1725,7 @@ form.successHandler(new MyAuthenticationSuccessHandler()) //认证成功时的�
 
 ### 认证失败响应
 
-失败结果处理：
+**失败结果处理**：
 
 ```java
 public class MyAuthenticationFailureHandler implements AuthenticationFailureHandler {
@@ -1751,7 +1751,7 @@ public class MyAuthenticationFailureHandler implements AuthenticationFailureHand
 }
 ```
 
-SecurityFilterChain配置：
+**SecurityFilterChain配置**：
 
 ```java
 form.failureHandler(new MyAuthenticationFailureHandler()) //认证失败时的处理
@@ -1759,7 +1759,7 @@ form.failureHandler(new MyAuthenticationFailureHandler()) //认证失败时的�
 
 ### 注销响应
 
-注销结果处理：
+**注销结果处理**：
 
 ```java
 public class MyLogoutSuccessHandler implements LogoutSuccessHandler {
@@ -1782,7 +1782,7 @@ public class MyLogoutSuccessHandler implements LogoutSuccessHandler {
 }
 ```
 
-SecurityFilterChain配置
+**SecurityFilterChain配置**：
 
 ```java
 http.logout(logout -> {
@@ -1796,7 +1796,7 @@ http.logout(logout -> {
 
 官方说明：[Servlet Authentication Architecture :: Spring Security](https://docs.spring.io/spring-security/reference/servlet/authentication/architecture.html)
 
-实现AuthenticationEntryPoint接口：
+**实现AuthenticationEntryPoint接口**：
 
 这里也希望系统**返回json结果**，因此我们定义类实现AuthenticationEntryPoint接口：
 
@@ -1823,7 +1823,7 @@ public class MyAuthenticationEntryPoint implements AuthenticationEntryPoint {
 }
 ```
 
-SecurityFilterChain配置：
+**SecurityFilterChain配置**：
 
 ```java
 //错误处理
@@ -1837,7 +1837,7 @@ http.exceptionHandling(exception  -> {
 跨域全称是跨域资源共享(`Cross-Origin Resources Sharing`，`CORS`)，它是浏览器的保护机制，只允许网页请求统一域名下的服务，同一域名指=>协议、域名、端口号都要保持一致，如果有一项不同，那么就是跨域请求。在前后端分离的项目中，需要解决跨域的问题。
 
 
-在SpringSecurity中解决跨域很简单，在配置文件中添加如下配置即可：
+在SpringSecurity中解决跨域在配置文件中添加如下配置：
 
 ```java
 //跨域
