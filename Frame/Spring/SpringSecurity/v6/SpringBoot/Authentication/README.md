@@ -2,6 +2,24 @@
 
 认证是网站的第一步，用户需要登录之后才能进入，使用SpringSecurity实现用户登录。
 
+系统认证是为了保护系统的隐私数据与资源，用户的身份合法方可访问该系统的资源。
+
+**认证**：用户认证就是判断一个用户的身份是否合法的过程。
+
+**常见的用户身份认证方式**：
+
+- 用户名密码登录
+
+- 二维码登录
+
+- 手机短信登录
+
+- 指纹认证
+
+- 人脸识别
+
+- 等等...
+
 ## 基于内存认证
 
 基于内存验证方式的权限校验存在一定的局限性，只适合快速搭建Demo使用，不适合实际生产环境下编写。
@@ -28,8 +46,12 @@ public class SecurityConfiguration {
                 .password("password")
                 .roles("ADMIN", "USER")
                 .build();
-        return new InMemoryUserDetailsManager(user, admin); 
+        //return new InMemoryUserDetailsManager(user, admin); 
       	//创建一个基于内存的用户信息管理器作为UserDetailsService
+        InMemoryUserDetailsManager userDetailsManager = new InMemoryUserDetailsManager();
+        userDetailsManager.createUser(user);
+        userDetailsManager.createUser(admin);
+        return userDetailsManager;
     }
 }
 ```
@@ -1739,7 +1761,22 @@ public class MyAuthenticationFailureHandler implements AuthenticationFailureHand
         //创建结果对象
         HashMap result = new HashMap();
         result.put("code", -1);
-        result.put("message", localizedMessage);
+//        result.put("message", localizedMessage);
+        if(exception instanceof BadCredentialsException){
+            result.put("message", "密码不正确");
+        }else if(exception instanceof DisabledException){
+            result.put("message", "账号被禁用");
+        }else if(exception instanceof UsernameNotFoundException){
+            result.put("message", "用户名不存在");
+        }else if(exception instanceof CredentialsExpiredException){
+            result.put("message", "密码已过期");
+        }else if(exception instanceof AccountExpiredException){
+            result.put("message", "账号已过期");
+        }else if(exception instanceof LockedException){
+            result.put("message", "账号被锁定");
+        }else{
+            result.put("message", "未知异常");
+        }
 
         //转换成json字符串
         String json = JSON.toJSONString(result);

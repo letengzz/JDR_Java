@@ -25,6 +25,12 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
 ## 密码加密
 
+密码加密一般使用散列函数，又称散列算法，哈希函数，这些函数都是单向函数 (从明文到密文，反之不行)
+
+**常用的散列算法**：MD5和SHA
+
+Spring Security提供多种密码加密方案，基本上都实现了PasswordEncoder接口，官方推荐使用BCryptPasswordEncoder
+
 **官方文档：**[Password Storage :: Spring Security](https://docs.spring.io/spring-security/reference/features/authentication/password-storage.html)
 
 ### 密码加密方式
@@ -162,7 +168,7 @@ public class SecurityConfiguration {
 
 ![image-20230702152150157](https://cdn.jsdelivr.net/gh/letengzz/tc2@main/img/Java/202309201839213.png)
 
-![image-20230702152216162](assets/tk5pGDrNHWfaJXU-17077209125561.png)
+![image-20230702152216162](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202402241742501.png)
 
 ## CSRF防护
 
@@ -520,7 +526,7 @@ public SecurityFilterChain filterChain(HttpSecurity http,PersistentTokenReposito
 
 总结起来，SecurityContextHolder用于管理当前线程的安全上下文，存储已认证用户的详细信息，其中包含了SecurityContext对象，该对象包含了Authentication对象，后者表示用户的身份验证信息，包括Principal（用户的身份标识）和Credential（用户的凭证信息）。
 
-![securitycontextholder](assets/securitycontextholder.png)
+![securitycontextholder](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202402241742176.png)
 
 在Controller中获取用户信息：
 
@@ -539,8 +545,8 @@ public class IndexController {
         SecurityContext context = SecurityContextHolder.getContext();//存储认证对象的上下文
         Authentication authentication = context.getAuthentication();//认证对象
         String username = authentication.getName();//用户名
-        Object principal =authentication.getPrincipal();//身份
-        Object credentials = authentication.getCredentials();//凭证(脱敏)
+        Object principal =authentication.getPrincipal();//身份 定义认证的而用户，如果用户使用用户名和密码方式登录，principal通常就是一个UserDetails
+        Object credentials = authentication.getCredentials();//凭证(脱敏) 登录凭证，一般就是指密码。当用户登录成功之后，登录凭证会被自动擦除，以方式泄露。
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();//权限
 
         System.out.println(username);
