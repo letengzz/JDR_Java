@@ -1,4 +1,4 @@
 # Spring Cloud
 
-- [Spring Cloud 2.x](v2/README.md)
-- [Spring Cloud 3.x](v3/README.md)
+- [Spring Cloud 2020](2020/README.md)
+- [Spring Cloud 2022](2022/README.md)
