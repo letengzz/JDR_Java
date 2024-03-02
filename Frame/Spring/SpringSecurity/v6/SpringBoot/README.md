@@ -19,6 +19,10 @@
 
 > Spring Security 授权：基于角色授权、基于权限授权、使用注解权限判断
 
+- [Spring Security 会话Session](Session/README.md)
+
+> Spring Security 会话Session：基于session的认证方式、基于token的认证方式
+
 - [Spring Security 内部机制](Principle/README.md)
 
 > Spring Security 内部机制：授权校验流程、安全上下文、安全上下文持久化过滤器
