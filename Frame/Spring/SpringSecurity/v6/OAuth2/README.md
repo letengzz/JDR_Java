@@ -163,3 +163,201 @@ RFC 6749 规定了这种方式，允许直接向前端颁发令牌。这种方�
 
 ![image-20231223020052999](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202402272032885.png)
 
+## Spring中的实现
+
+[OAuth2 :: Spring Security](https://docs.spring.io/spring-security/reference/servlet/oauth2/index.html)
+
+**Spring Security**
+
+- 客户应用 (`OAuth2 Client`)：OAuth2客户端功能中包含OAuth2 Login
+- 资源服务器 (`OAuth2 Resource Server`)
+
+**Spring**
+
+- 授权服务器 (`Spring Authorization Server`)：它是在Spring Security之上的一个单独的项目。
+
+**相关依赖**：
+
+```xml
+<!-- 资源服务器 -->
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+</dependency>
+
+<!-- 客户应用 -->
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-oauth2-client</artifactId>
+</dependency>
+
+<!-- 授权服务器 -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-oauth2-authorization-server</artifactId>
+</dependency>
+```
+
+## 授权登录的实现思路
+
+使用OAuth2 Login
+
+![image-20231223164128030](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202402282259426.png)
+
+## GitHub社交登录
+
+### 登录流程
+
+1. **A 网站让用户跳转到 GitHub，并携带参数ClientID 以及 Redirection URI。**
+2. GitHub 要求用户登录，然后询问用户"A 网站要求获取用户信息的权限，你是否同意？"
+3. 用户同意，GitHub 就会重定向回 A 网站，同时发回一个授权码。
+4. **A 网站使用授权码，向 GitHub 请求令牌。**
+5. GitHub 返回令牌.
+6. **A 网站使用令牌，向 GitHub 请求用户数据。**
+7. GitHub返回用户数据
+8. **A 网站使用 GitHub用户数据登录**
+
+![image-20231223203225688](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202402282302176.png)
+
+### 创建应用
+
+**注册客户应用：**
+
+登录GitHub，在开发者设置中找到OAuth Apps，创建一个application，为客户应用创建访问GitHub的凭据：
+
+![image-20230510154255157](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202402282305358.png)
+
+填写应用信息：`默认的重定向URI模板为{baseUrl}/login/oauth2/code/{registrationId}`。registrationId是ClientRegistration的唯一标识符。
+
+![image-20231221000906168](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202402282311969.png)
+
+获取应用程序id，生成应用程序密钥：
+
+![image-20240228231246355](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202402282312690.png)
+
+### 创建测试项目
+
+创建一个springboot项目oauth2-login-demo，创建时引入如下依赖
+
+![image-20240228231909467](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202402282319935.png)
+
+
+
+示例代码参考：[spring-security-samples/servlet/spring-boot/java/oauth2/login at 6.2.x · spring-projects/spring-security-samples (github.com)](https://github.com/spring-projects/spring-security-samples/tree/6.2.x/servlet/spring-boot/java/oauth2/login)
+
+### 配置OAuth客户端属性
+
+application.yml：
+
+```properties
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: 06146d02b8b57824a934
+            client-secret: 65069dcfd21288d79730613b6a93ebf4f84780ae
+#            redirectUri: http://localhost:8200/login/oauth2/code/github
+```
+
+### 创建Controller
+
+```java
+@Controller
+public class IndexController {
+
+    @GetMapping("/")
+    public String index(
+            Model model,
+            @RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient authorizedClient,
+            @AuthenticationPrincipal OAuth2User oauth2User) {
+        model.addAttribute("userName", oauth2User.getName());
+        model.addAttribute("clientName", authorizedClient.getClientRegistration().getClientName());
+        model.addAttribute("userAttributes", oauth2User.getAttributes());
+        return "index";
+    }
+}
+```
+
+### 创建html页面
+
+resources/templates/index.html
+
+```html
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <title>Spring Security - OAuth 2.0 Login</title>
+    <meta charset="utf-8" />
+</head>
+<body>
+<div style="float: right" th:fragment="logout" sec:authorize="isAuthenticated()">
+    <div style="float:left">
+        <span style="font-weight:bold">User: </span><span sec:authentication="name"></span>
+    </div>
+    <div style="float:none">&nbsp;</div>
+    <div style="float:right">
+        <form action="#" th:action="@{/logout}" method="post">
+            <input type="submit" value="Logout" />
+        </form>
+    </div>
+</div>
+<h1>OAuth 2.0 Login with Spring Security</h1>
+<div>
+    You are successfully logged in <span style="font-weight:bold" th:text="${userName}"></span>
+    via the OAuth 2.0 Client <span style="font-weight:bold" th:text="${clientName}"></span>
+</div>
+<div>&nbsp;</div>
+<div>
+    <span style="font-weight:bold">User Attributes:</span>
+    <ul>
+        <li th:each="userAttribute : ${userAttributes}">
+            <span style="font-weight:bold" th:text="${userAttribute.key}"></span>: <span th:text="${userAttribute.value}"></span>
+        </li>
+    </ul>
+</div>
+</body>
+</html>
+```
+
+### 启动应用程序
+
+- 启动程序并访问localhost:8080。浏览器将被重定向到默认的自动生成的登录页面，该页面显示了一个用于GitHub登录的链接。
+- 点击GitHub链接，浏览器将被重定向到GitHub进行身份验证。
+- 使用GitHub账户凭据进行身份验证后，用户会看到授权页面，询问用户是否允许或拒绝客户应用访问GitHub上的用户数据。点击允许以授权OAuth客户端访问用户的基本个人资料信息。
+- 此时，OAuth客户端访问GitHub的获取用户信息的接口获取基本个人资料信息，并建立一个已认证的会话。
+
+### CommonOAuth2Provider
+
+CommonOAuth2Provider是一个预定义的通用OAuth2Provider，为一些知名资源服务API提供商（如Google、GitHub、Facebook）预定义了一组默认的属性。
+
+例如，**授权URI、令牌URI和用户信息URI**通常不经常变化。因此，提供默认值以减少所需的配置。
+
+因此，当配置GitHub客户端时，只需要提供client-id和client-secret属性。
+
+```java
+GITHUB {
+    public ClientRegistration.Builder getBuilder(String registrationId) {
+        ClientRegistration.Builder builder = this.getBuilder(
+        registrationId, 
+        ClientAuthenticationMethod.CLIENT_SECRET_BASIC, 
+        
+        //授权回调地址(GitHub向客户应用发送回调请求，并携带授权码)   
+		"{baseUrl}/{action}/oauth2/code/{registrationId}");
+        builder.scope(new String[]{"read:user"});
+        //授权页面
+        builder.authorizationUri("https://github.com/login/oauth/authorize");
+        //客户应用使用授权码，向 GitHub 请求令牌
+        builder.tokenUri("https://github.com/login/oauth/access_token");
+        //客户应用使用令牌向GitHub请求用户数据
+        builder.userInfoUri("https://api.github.com/user");
+        //username属性显示GitHub中获取的哪个属性的信息
+        builder.userNameAttributeName("id");
+        //登录页面超链接的文本
+        builder.clientName("GitHub");
+        return builder;
+    }
+},
+```
+
