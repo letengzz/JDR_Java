@@ -603,3 +603,12 @@ http.sessionManagement(session -> {
         .expiredSessionStrategy(new MySessionInformationExpiredStrategy());
 });
 ```
+
+当使用无状态的JWT方案时，不需要维护Session (JWT控制)，所以需要将会话处理为无状态：
+
+```java
+http.sessionManagement(session -> {
+	session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+});
+```
+
