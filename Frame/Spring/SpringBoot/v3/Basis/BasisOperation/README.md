@@ -843,3 +843,23 @@ log4j2支持yaml和json格式的配置文件：
 ![image-20230730012645555](https://cdn.jsdelivr.net/gh/letengzz/Two-C@main/img/Java/202307300126702.png)
 
 **第三方框架**：排除掉框架的默认日志，参考 `spring-boot-starter` 排除了默认的logging配置
+
+## 时间格式统一
+
+可以在相应的类的属性上使用 `@JsonFormat`注解来实现时间格式的统一：
+
+```java
+@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+private Date createTime;
+```
+
+也可以在 application.yaml文件中指定：
+
+```yaml
+spring:
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+```
+
