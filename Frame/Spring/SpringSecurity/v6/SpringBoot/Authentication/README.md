@@ -1711,7 +1711,7 @@ public class DBUserDetailsManager implements UserDetailsManager, UserDetailsPass
 </dependency>
 ```
 
-### 认证成功的响应
+### 认证成功响应
 
 **成功结果处理**：
 
