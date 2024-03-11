@@ -82,6 +82,35 @@ public class User {
 }
 ```
 
+```java
+@Test
+void chainTest() {
+    User user = new User().setName("张三").setAge(15);
+	System.out.println("user = " + user);
+}
+```
+
+建造者模式：
+
+```java
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class User {
+    private String name;
+    private Integer age;
+}
+```
+
+```java
+@Test
+void builderTest(){
+    User user = User.builder().name("李四").age(18).build();
+	System.out.println("user = " + user);
+}
+```
+
 **注意**：使用Lombok时，当有特殊需求时也可定制自己的代码。
 
 
