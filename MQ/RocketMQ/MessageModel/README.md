@@ -79,25 +79,28 @@ RocketMQ可以一次性发送一组消息，那么这一组消息会被当做一
 
 事务消息可以被认为是一个两阶段的提交消息实现，以确保分布式系统的最终一致性。事务性消息确保本地事务的执行和消息的发送可以原子地执行。
 
-事务消息的大致分为两个流程：正常事务消息的发送及提交、事务消息的补偿流程。
+![](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202403192216672.png)
 
-事务消息发送及提交：
-1. 发送消息（half消息）
-2. 服务端响应消息写入结果
-3. 根据发送结果执行本地事务（如果写入失败，此时half消息对业务不可见，本地逻辑不执行）
-4. 根据本地事务状态执行Commit或Rollback（Commit操作生成消息索引，消息对消费者可见）
+事务消息的大致分为两个流程：正常事务消息的发送及提交、事务消息的补偿流程：
 
-事务补偿：
-1. 对没有Commit/Rollback的事务消息（pending状态的消息），从服务端发起一次“回查”
-2. Producer收到回查消息，检查回查消息对应的本地事务的状态
-3. 根据本地事务状态，重新Commit或者Rollback
+- 事务消息发送及提交：
+  1. 发送消息（half消息）
+  2. 服务端响应消息写入结果
+  3. 根据发送结果执行本地事务（如果写入失败，此时half消息对业务不可见，本地逻辑不执行）
+  4. 根据本地事务状态执行Commit或Rollback（Commit操作生成消息索引，消息对消费者可见）
+- 事务补偿：
+  1. 对没有Commit/Rollback的事务消息（pending状态的消息），从服务端发起一次“回查”
+  2. Producer收到回查消息，检查回查消息对应的本地事务的状态
+  3. 根据本地事务状态，重新Commit或者Rollback
+  4. 其中，补偿阶段用于解决消息UNKNOW或者Rollback发生超时或者失败的情况。
 
-其中，补偿阶段用于解决消息UNKNOW或者Rollback发生超时或者失败的情况。
+![](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202403192217004.png)
 
-事务消息共有三种状态：提交状态、回滚状态、中间状态
-- 提交事务 (TransactionStatus.CommitTransaction)：它允许消费者消费此消息。
-- 回滚事务 (TransactionStatus.RollbackTransaction)：它代表该消息将被删除，不允许被消费。
-- 中间状态 (TransactionStatus.Unknown)：它代表需要检查消息队列来确定状态。
+**事务消息共有三种状态**：提交状态、回滚状态、中间状态
+
+- **提交事务** (`TransactionStatus.CommitTransaction`)：它允许消费者消费此消息。
+- **回滚事务** (`TransactionStatus.RollbackTransaction`)：它代表该消息将被删除，不允许被消费。
+- **中间状态** (`TransactionStatus.Unknown`)：它代表需要检查消息队列来确定状态。
 
 ## 消息过滤
 
