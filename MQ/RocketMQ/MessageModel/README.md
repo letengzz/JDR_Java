@@ -108,6 +108,8 @@ RocketMQ提供消息过滤功能，通过tag或者key进行区分
 
 往一个主题里面发送消息的时候，根据业务逻辑，可能需要区分，比如带有tagA标签的被A消费，带有tagB标签的被B消费，还有在事务监听的类里面，只要是事务消息都要走同一个监听，也需要通过过滤才区别对待
 
+**官方文档**：https://rocketmq.apache.org/zh/docs/featureBehavior/07messagefilter
+
 ### 带标签(Tag)的消息
 
 不同的业务应该使用不同的Topic如果是相同的业务里面有不同表的表现形式，那么要使用tag进行区分：
@@ -121,6 +123,8 @@ RocketMQ提供消息过滤功能，通过tag或者key进行区分
 4. **消息量级是否相当**：有些业务消息虽然量小但是实时性要求高，如果跟某些万亿量级的消息使用同一个 Topic，则有可能会因为过长的等待时间而“饿死”，此时需要将不同量级的消息进行拆分，使用不同的 Topic。
 
 总的来说，针对消息分类，您可以选择创建多个 Topic，或者在同一个 Topic 下创建多个 Tag。但通常情况下，不同的 Topic 之间的消息没有必然的联系，而 Tag 则用来区分同一个 Topic 下相互关联的消息，例如全集和子集的关系、流程先后的关系。
+
+**官方文档**：https://rocketmq.apache.org/zh/docs/bestPractice/05subscribe
 
 ### 带key的消息
 

@@ -64,7 +64,7 @@ public class Consumer {
                 System.out.println("消费上下文:"+consumeConcurrentlyContext);
                 // 返回消费的状态 如果是CONSUME_SUCCESS 则成功，若为RECONSUME_LATER则该条消息会被重回队列，重新被投递
                 // 重试的时间为messageDelayLevel = "1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h
-                // 也就是第一次1s 第二次5s 第三次10s  ....  如果重试了18次 那么这个消息就会被终止发送给消费者
+                // 也就是第一次1s 第二次5s 第三次10s  ....  如果重试了16次 那么这个消息就会被终止发送给消费者
                 // 返回状态：
                 // CONSUME_SUCCESS：成功 消息会从mq出队
                 // RECONSUME_LATER：失败(报错、null) 消息会重新回到队列 过一会重新投递出来 给当前消费者或者其他消费者消费的
