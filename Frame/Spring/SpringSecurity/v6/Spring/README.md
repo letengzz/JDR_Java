@@ -1,10 +1,10 @@
-# Spring Security6 - Spring
+# Spring Security6-Spring
 
 ![img](https://cdn.jsdelivr.net/gh/letengzz/tc2@main/img/Java/202309201637507.jpeg)
 
-- [Spring Security 概述](Basis/Introduce/README.md)
+- [Spring Security 概述](../Introduce/README.md)
 
-- [Spring Security 构建入门程序](Basis/BasicProgram/README.md)
+- [Spring Security 构建入门程序](BasicProgram/README.md)
 
 - [Spring Security 认证](Advanced/Authentication/README.md)
 
