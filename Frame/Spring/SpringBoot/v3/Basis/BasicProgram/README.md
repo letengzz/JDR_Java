@@ -184,6 +184,8 @@ public class HelloController {
 
 ## 5. 配置参数
 
+在Spring Boot项目中，默认会提供一个application.properties或者application.yml文件，把一些全局性的配置或者需要动态维护的配置写入改文件，比如数据库连接，功能开关，限流阈值，服务地址等。
+
 **配置文件名称必须为`application.properties`**：
 
 - 集中式管理配置。只需要修改这个文件就行 
