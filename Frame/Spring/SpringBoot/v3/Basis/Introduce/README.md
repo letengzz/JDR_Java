@@ -14,7 +14,7 @@ Spring Boot **特性**：
 1. 没有代码生成，无需 XML 配置。
 1. 简化部署，打包为可执行的jar包。
 
-有了spring boot脚⼿架才能使⽤Spring Cloud，开发分布式微服务架构的项⽬。
+有了spring boot脚手架才能使用Spring Cloud，开发分布式微服务架构的项⽬。
 
 - SpringBoot 官方文档：https://spring.io/projects/spring-boot
 - 版本新特性：https://github.com/spring-projects/spring-boot/wiki#release-notes
@@ -54,7 +54,7 @@ In short, the **microservice architectural style** is an approach to developing 
 
 #### 分布式的解决
 
-- SpringBoot + [SpringCloud](../../SpringCloud/README.md)
+- SpringBoot + [SpringCloud](../../../../SpringCloud/README.md)
 
 ![image-20230222183107799](https://cdn.jsdelivr.net/gh/letengzz/Two-C@main/img/Java/202302221831240.png)
 
