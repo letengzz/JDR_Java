@@ -2,24 +2,6 @@
 
 认证是网站的第一步，用户需要登录之后才能进入，使用SpringSecurity实现用户登录。
 
-系统认证是为了保护系统的隐私数据与资源，用户的身份合法方可访问该系统的资源。
-
-**认证**：用户认证就是判断一个用户的身份是否合法的过程。
-
-**常见的用户身份认证方式**：
-
-- 用户名密码登录
-
-- 二维码登录
-
-- 手机短信登录
-
-- 指纹认证
-
-- 人脸识别
-
-- 等等...
-
 ## 基于内存验证
 
 ### 配置登录
@@ -115,7 +97,7 @@ public class SecurityConfiguration {
 
 ![image-20230702152150157](https://cdn.jsdelivr.net/gh/letengzz/tc2@main/img/Java/202309201839213.png)
 
-![image-20230702152216162](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202402241612376.png)
+![image-20230702152216162](./assets/tk5pGDrNHWfaJXU.png)
 
 ### CSRF防护
 
@@ -166,45 +148,29 @@ create table authorities (username varchar(50) not null,authority varchar(50) no
 create unique index ix_auth_username on authorities (username,authority);
 ```
 
-添加Mybatis-plus和MySQL相关的依赖：
+添加Mybatis和MySQL相关的依赖：
 
 ```xml
 <dependency>
-	<groupId>com.mysql</groupId>
-	<artifactId>mysql-connector-j</artifactId>
+    <groupId>org.mybatis</groupId>
+    <artifactId>mybatis</artifactId>
+    <version>3.5.13</version>
 </dependency>
 <dependency>
-	<groupId>com.baomidou</groupId>
-	<artifactId>mybatis-plus-boot-starter</artifactId>
-	<version>3.5.5</version>
+    <groupId>org.mybatis</groupId>
+    <artifactId>mybatis-spring</artifactId>
+    <version>3.0.2</version>
 </dependency>
 <dependency>
-    <groupId>org.projectlombok</groupId>
-    <artifactId>lombok</artifactId>
+    <groupId>com.mysql</groupId>
+    <artifactId>mysql-connector-j</artifactId>
+    <version>8.0.31</version>
 </dependency>
 <dependency>
-    <groupId>com.alibaba.fastjson2</groupId>
-    <artifactId>fastjson2</artifactId>
-    <version>2.0.43</version>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-jdbc</artifactId>
+    <version>6.0.10</version>
 </dependency>
-```
-
-配置数据源：
-
-> src/main/resources/application.yaml
-
-```yaml
-# MySQL 数据源
-spring:
-  datasource:
-    username: root
-    password: 123123
-    url: jdbc:mysql://localhost:3306/spring-security
-    driver-class-name: com.mysql.cj.jdbc.Driver
-#SQL日志
-mybatis-plus:
-  configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 ```
 
 编写配置类：
@@ -214,9 +180,15 @@ mybatis-plus:
 @EnableWebSecurity
 public class SecurityConfiguration {
 
-    @Bean 
-    PasswordEncoder passwordEncoder(){
+    @Bean PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public DataSource dataSource(){
+      	//数据源配置
+        return new PooledDataSource("com.mysql.cj.jdbc.Driver",
+             "jdbc:mysql://localhost:3306/security_study", "root", "123123");
     }
 
     @Bean
@@ -316,50 +288,39 @@ public interface UserDetailsManager extends UserDetailsService {
 
 3. 在主界面中添加一个重置密码的操作：
 
-   ```html
-   <!DOCTYPE html>
-   <html lang="en">
-   <head>
-       <meta charset="UTF-8">
-       <title>首页</title>
-       <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
-   </head>
-   <body>
+   ```java
    <div>
        <label>
            修改密码：
            <input type="text" id="oldPassword" placeholder="旧密码"/>
            <input type="text" id="newPassword" placeholder="新密码"/>
-           <input type="text" th:id="${_csrf.getParameterName()}" th:value="${_csrf.token}" hidden>
        </label>
        <button onclick="change()">修改密码</button>
    </div>
-   </body>
-   </html>
-   
-   <script>
-       function change() {
-           const oldPassword = document.getElementById("oldPassword").value
-           const newPassword = document.getElementById("newPassword").value
-           const csrf = document.getElementById("_csrf").value
-           axios.post('/change-password', {
-               oldPassword: oldPassword,
-               newPassword: newPassword,
-               _csrf: csrf
-           }, {
-               headers: {
-                   'Content-Type': 'application/x-www-form-urlencoded'
-               }
-           }).then(({data}) => {
-               alert(data.success ? "密码修改成功" : "密码修改失败，请检查原密码是否正确")
-           })
-       }
-   </script>
+   ```
+
+   ```js
+   function change() {
+       const oldPassword = document.getElementById("oldPassword").value
+       const newPassword = document.getElementById("newPassword").value
+       const csrf = document.getElementById("_csrf").value
+       axios.post('/mvc/change-password', {
+           oldPassword: oldPassword,
+           newPassword: newPassword,
+           _csrf: csrf
+       }, {
+           headers: {
+               'Content-Type': 'application/x-www-form-urlencoded'
+           }
+       }).then(({data}) => {
+           alert(data.success ? "密码修改成功" : "密码修改失败，请检查原密码是否正确")
+       })
+   }
    ```
 
 这样就可以在首页进行修改密码操作了：
 
-![image-20240212101910122](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202402241612104.png)
+![image-20230921121309511](https://cdn.jsdelivr.net/gh/letengzz/tc2@main/img/Java/202309211213266.png)
 
 当然，这种方式的权限校验虽然能够直接使用数据库，但是存在一定的局限性，只适合快速搭建Demo使用，不适合实际生产环境下编写。
 
@@ -369,154 +330,7 @@ public interface UserDetailsManager extends UserDetailsService {
 
 既然需要自定义，那么就需要自行实现UserDetailsService或是功能更完善的UserDetailsManager接口。
 
-### 准备工作
-
-创建数据库表并插入测试数据
-
-```sql
--- 创建数据库
-CREATE DATABASE `security-demo`;
-USE `security-demo`;
-
--- 创建用户表
-CREATE TABLE `user`(
-	`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	`username` VARCHAR(50) DEFAULT NULL ,
-	`password` VARCHAR(500) DEFAULT NULL,
-	`enabled` BOOLEAN NOT NULL
-);
--- 唯一索引
-CREATE UNIQUE INDEX `user_username_uindex` ON `user`(`username`); 
-
--- 插入用户数据(密码是 "password" )
-INSERT INTO `user` (`username`, `password`, `enabled`) VALUES
-('admin', '{bcrypt}$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmNSJZ.0FxO/BTk76klW', TRUE),
-('Helen', '{bcrypt}$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmNSJZ.0FxO/BTk76klW', TRUE),
-('Tom', '{bcrypt}$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmNSJZ.0FxO/BTk76klW', TRUE);
-```
-
-添加Mybatis-plus和MySQL相关的依赖：
-
-```xml
-<dependency>
-	<groupId>com.mysql</groupId>
-	<artifactId>mysql-connector-j</artifactId>
-</dependency>
-<dependency>
-    <groupId>com.baomidou</groupId>
-    <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
-    <version>3.5.5</version>
-</dependency>
-<dependency>
-    <groupId>org.projectlombok</groupId>
-    <artifactId>lombok</artifactId>
-</dependency>
-<dependency>
-    <groupId>com.alibaba.fastjson2</groupId>
-    <artifactId>fastjson2</artifactId>
-    <version>2.0.43</version>
-</dependency>
-```
-
-配置数据源：
-
-> src/main/resources/application.yaml
-
-```yaml
-# MySQL 数据源
-spring:
-  datasource:
-    username: root
-    password: 123123
-    url: jdbc:mysql://localhost:3306/security-demo
-    driver-class-name: com.mysql.cj.jdbc.Driver
-#SQL日志
-mybatis-plus:
-  configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-```
-
-创建实体类：
-
-> src/main/java/com/hjc/demo/entity/User.java
-
-```java
-@Data
-public class User {
-    @TableId(value = "id", type = IdType.AUTO)
-    private Integer id;
-
-    private String username;
-
-    private String password;
-
-    private Boolean enabled;
-}
-```
-
-创建Mapper接口：
-
-> src/main/java/com/hjc/demo/mapper/UserMapper.java
-
-```java
-@Mapper
-public interface UserMapper extends BaseMapper<User> {
-}
-```
-
-> src/main/resources/mapper/UserMapper.xml
-
-```xml
-<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper
-        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hjc.demo.mapper.UserMapper">
-
-</mapper>
-```
-
-创建Service 接口及实现类：
-
-> src/main/java/com/hjc/demo/service/UserService.java
-
-```java
-public interface UserService extends IService<User> {
-}
-```
-
-> src/main/java/com/hjc/demo/service/impl/UserServiceImpl.java
-
-```java
-@Service
-public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
-}
-```
-
-创建Controller：
-
-> src/main/java/com/hjc/demo/controller/UserController.java
-
-```java
-@RestController
-@RequestMapping("/user")
-public class UserController {
-
-    @Resource
-    public UserService userService;
-
-    @GetMapping("/list")
-    public List<User> getList(){
-        return userService.list();
-    }
-}
-```
-
-启动并访问：http://localhost:8080/user/list
-
-![image-20240212141018383](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202402241612365.png)
-
-### 实现 UserDetailsService
+### 实现UserDetailsService
 
 可以直接选择UserDetailsService进行实现：
 
@@ -533,6 +347,60 @@ public class AuthorizeService implements UserDetailsService {
 
 实现这个`loadUserByUsername`方法，表示在验证的时候通过自定义的方式，根据给定的用户名查询用户，并封装为`UserDetails`对象返回，然后由SpringSecurity将返回的对象与用户登录的信息进行核验，基本流程实际上跟之前是一样的，只是现在由自己来提供用户查询方式。
 
+在数据库中创建一个自定义的用户表：
+
+```sql
+CREATE TABLE account  (
+  id int NOT NULL AUTO_INCREMENT,
+  username varchar(255),
+  password varchar(255),
+  PRIMARY KEY (id)
+);
+```
+
+![image-20230921133133832](https://cdn.jsdelivr.net/gh/letengzz/tc2@main/img/Java/202309211331292.png)
+
+随便插入数据：
+
+![image-20230921133235479](https://cdn.jsdelivr.net/gh/letengzz/tc2@main/img/Java/202309211332849.png)
+
+自行编写对应的查询操作：
+
+1. 创建实体类：
+
+   ```java
+   @Data
+   public class Account {
+       int id;
+       String username;
+       String password;
+   }
+   ```
+
+2. 根据用户名查询用户的Mapper接口：
+
+   ```java
+   public interface UserMapper {
+       @Select("select * from account where username = #{username}")
+       Account findAccountByName(String username);
+   }
+   ```
+
+3. 在配置类上添加相应的包扫描：
+
+   ```java
+   @EnableWebMvc
+   @Configuration
+   @ComponentScans({
+           @ComponentScan("com.example.controller"),
+           @ComponentScan("com.example.service")
+   })
+   @MapperScan("com.example.mapper")
+   public class WebConfiguration implements WebMvcConfigurer {
+     	...
+   }
+   ```
+
 完善Service从数据库中进行查询：
 
 ```java
@@ -540,7 +408,7 @@ public class AuthorizeService implements UserDetailsService {
 public class AuthorizeService implements UserDetailsService {
 
     @Resource
-    private UserMapper mapper;
+    UserMapper mapper;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -557,80 +425,4 @@ public class AuthorizeService implements UserDetailsService {
 
 这样，就通过自定义的方式实现了数据库信息查询，并完成用户登录操作。
 
-![image-20240212142358194](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202402241613027.png)
-
-### 实现 DBUserDetailsManager
-
-也可以选择DBUserDetailsManager进行实现：
-
-```java
-@Component
-public class DBUserDetailsManager implements UserDetailsManager, UserDetailsPasswordService {
-
-    @Resource
-    private UserMapper mapper;
-
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("username", username);
-        User user = mapper.selectOne(queryWrapper);
-        if (user == null) {
-            throw new UsernameNotFoundException(username);
-        } else {
-            Collection<GrantedAuthority> authorities = new ArrayList<>();
-            return new org.springframework.security.core.userdetails.User(
-                    user.getUsername(),
-                    user.getPassword(),
-                    user.getEnabled(),
-                    true, //用户账号是否过期
-                    true, //用户凭证是否过期
-                    true, //用户是否未被锁定
-                    authorities); //权限列表
-        }
-    }
-
-    @Override
-    public UserDetails updatePassword(UserDetails user, String newPassword) {
-        return null;
-    }
-
-    @Override
-    public void createUser(UserDetails user) {
-
-    }
-
-    @Override
-    public void updateUser(UserDetails user) {
-
-    }
-
-    @Override
-    public void deleteUser(String username) {
-
-    }
-
-    @Override
-    public void changePassword(String oldPassword, String newPassword) {
-
-    }
-
-    @Override
-    public boolean userExists(String username) {
-        return false;
-    }
-}
-```
-
-这样，就通过自定义的方式实现了数据库信息查询，并完成用户登录操作。
-
-![image-20240212142358194](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202402241613461.png)
-
-### 用户认证流程
-
-- 程序启动时：
-  - 创建`DBUserDetailsManager`类，实现接口 UserDetailsManager, UserDetailsPasswordService
-  - 在应用程序中初始化这个类的对象
-- 校验用户时：
-  - SpringSecurity自动使用`DBUserDetailsManager`的`loadUserByUsername`方法从`数据库中`获取User对象
-  - 在`UsernamePasswordAuthenticationFilter`过滤器中的`attemptAuthentication`方法中将用户输入的用户名密码和从数据库中获取到的用户信息进行比较，进行用户认证
+![image-20230921135830847](https://cdn.jsdelivr.net/gh/letengzz/tc2@main/img/Java/202309211358458.png)

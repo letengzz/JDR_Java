@@ -1,4 +1,4 @@
-# Spring Security 6-SpringBoot
+# Spring Security 6 - SpringBoot
 
 ![img](https://cdn.jsdelivr.net/gh/letengzz/tc2@main/img/Java/202309201637507.jpeg)
 
