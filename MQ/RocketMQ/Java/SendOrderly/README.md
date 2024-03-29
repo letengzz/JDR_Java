@@ -22,7 +22,7 @@ RocketMQ的broker的机制，导致了RocketMQ会有这个问题 因为一个bro
   1. 创建订单对象
 
      > com.hjc.demo.domain.Order
-  
+
      ```java
      @NoArgsConstructor
      @AllArgsConstructor
@@ -54,9 +54,9 @@ RocketMQ的broker的机制，导致了RocketMQ会有这个问题 因为一个bro
          private String desc;
      }
      ```
-  
+
   2. 顺序消息生产者
-  
+
      ```java
      public class Producer {
          public static void main(String[] args) throws MQClientException, MQBrokerException, RemotingException, InterruptedException {
@@ -111,11 +111,11 @@ RocketMQ的broker的机制，导致了RocketMQ会有这个问题 因为一个bro
          }
      }
      ```
-  
+
      ![image-20240319134014174](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202403191340476.png)
-  
+
   3. 顺序消息消费者：测试时等一会即可有延迟
-  
+
      ```java
      public class Consumer {
          public static void main(String[] args) throws MQClientException, IOException {
@@ -143,5 +143,5 @@ RocketMQ的broker的机制，导致了RocketMQ会有这个问题 因为一个bro
          }
      }
      ```
-  
+
      ![image-20240319135217765](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202403191352348.png)
