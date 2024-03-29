@@ -38,6 +38,8 @@ RocketMQ提供了发送多种发送消息的模式，例如同步消息，异步
 
 ![](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202403172015667.jpg)
 
+**官方文档**：https://rocketmq.apache.org/zh/docs/featureBehavior/01normalmessage
+
 ## 发送异步消息
 
 异步消息通常用在对响应时间敏感的业务场景，即发送端不能容忍长时间地等待Broker的响应。发送完以后会有一个异步消息通知
@@ -54,6 +56,8 @@ RocketMQ提供了发送多种发送消息的模式，例如同步消息，异步
 
 **注意**：RocketMQ不支持任意时间的延时 只支持几个固定的延时等级，等级1就对应1s，以此类推，最高支持2h延迟(`1s`、`5s`、`10s`、`30s`、`1m`、`2m`、`3m`、`4m`、`5m`、`6m`、`7m`、`8m`、`9m`、`10m`、`20m`、`30m`、`1h`、`2h`)
 
+**官方文档**：https://rocketmq.apache.org/zh/docs/featureBehavior/02delaymessage
+
 ## 发送顺序消息
 
 消息有序指的是可以按照消息的发送顺序来消费(FIFO)。RocketMQ可以严格的保证消息有序，可以分为：分区有序或者全局有序。
@@ -64,16 +68,24 @@ RocketMQ的broker的机制，导致了RocketMQ会有这个问题 因为一个bro
 
 顺序消费的原理解析：在默认的情况下消息发送会采取Round Robin轮询方式把消息发送到不同的queue(分区队列)；而消费消息的时候从多个queue上拉取消息，这种情况发送和消费是不能保证顺序。但是如果控制发送的顺序消息只依次发送到同一个queue中，消费的时候只从这个queue上依次拉取，则就保证了顺序。当发送和消费参与的queue只有一个，则是全局有序；如果多个queue参与，则为分区有序，即相对每个queue，消息都是有序的。
 
+**官方文档**：https://rocketmq.apache.org/zh/docs/featureBehavior/03fifomessage
+
 ## 发送批量消息
 
-RocketMQ可以一次性发送一组消息，那么这一组消息会被当做一个消息消费
+RocketMQ可以一次性发送一组消息，那么这一组消息会被当做一个消息消费。
 
-消息会被投递(或者消费者主动拉取)给每一个组，在每一个组内是进行负载均衡还是广播模式，是看这个消费者组的配置
+**使用场景**：
 
-- 负载均衡模式：`MessageModel.CLUSTERING`
-- 广播模式：`MessageModel.BROADCASTING`
+如果消息过多，每次发送消息都和MQ建立连接，无疑是一种性能开销，批量消息可以把消息打包批量发送，批量发送消息能显著提高传递小消息的性能。
 
-![image-20231219205310716](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202312192053776.png)
+**批量消息限制**：
+
+批量发送消息能显著提高传递消息的性能。**限制是这些批量消息应该有相同的Topic，而且不能是延时消息**。此外，这一批消息的**总大小不应超过4MB**
+
+如果超过可以有2种处理方案：
+
+1. 将消息进行切割成多个小于4M的内容进行发送
+2. 修改4M的限制改成更大：可以设置Producer的maxMessageSize属性；修改配置文件中的maxMessageSize属性
 
 ## 发送事务消息
 
@@ -89,7 +101,7 @@ RocketMQ可以一次性发送一组消息，那么这一组消息会被当做一
   3. 根据发送结果执行本地事务（如果写入失败，此时half消息对业务不可见，本地逻辑不执行）
   4. 根据本地事务状态执行Commit或Rollback（Commit操作生成消息索引，消息对消费者可见）
 - 事务补偿：
-  1. 对没有Commit/Rollback的事务消息（pending状态的消息），从服务端发起一次“回查”
+  1. 对没有Commit/Rollback的事务消息（pending状态的消息），从服务端发起一次"回查"
   2. Producer收到回查消息，检查回查消息对应的本地事务的状态
   3. 根据本地事务状态，重新Commit或者Rollback
   4. 其中，补偿阶段用于解决消息UNKNOW或者Rollback发生超时或者失败的情况。
@@ -101,6 +113,8 @@ RocketMQ可以一次性发送一组消息，那么这一组消息会被当做一
 - **提交事务** (`TransactionStatus.CommitTransaction`)：它允许消费者消费此消息。
 - **回滚事务** (`TransactionStatus.RollbackTransaction`)：它代表该消息将被删除，不允许被消费。
 - **中间状态** (`TransactionStatus.Unknown`)：它代表需要检查消息队列来确定状态。
+
+**官方文档**：https://rocketmq.apache.org/zh/docs/featureBehavior/04transactionmessage
 
 ## 消息过滤
 
