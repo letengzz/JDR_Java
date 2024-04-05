@@ -40,7 +40,7 @@ Spring Cloud是一个由许多子项目组成的综合项目，各子项目有�
 
 当SpringCloud的发布内容积累到临界点或者一个重大BUG被解决后，会发布一个"service releases"版本，简称SRX版本，比如Greenwich.SR2就是SpringCloud发布的Greenwich版本的第2个SRX版本。
 
-![](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202403011308699.png)
+![image-20240405152616569](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202404051526584.png)
 
 **Spring Cloud 和Spring Boot版本对应关系**：
 
