@@ -1,8 +1,13 @@
 # LoadBalancer 负载均衡
 
-SpringCloud原有的客户端负载均衡方案Ribbon已经被废弃，取而代之的是SpringCloud LoadBalancer，LoadBalancer是Spring Cloud Commons的一个子项目，他属于上述的第二种方式，是将负载均衡逻辑封装到客户端中，并且运行在客户端的进程里。
+SpringCloud原有的客户端负载均衡方案Ribbon已经被废弃，取而代之的是SpringCloud LoadBalancer，LoadBalancer是Spring Cloud Commons的一个子项目，他属于客户端负载均衡方式，是将负载均衡逻辑封装到客户端中，并且运行在客户端的进程里。
 
-**在Spring Cloud构件微服务系统中，LoadBalancer作为服务消费者的负载均衡器，有两种使用方式，一种是和RestTemplate相结合，另一种是和Feign相结合，Feign已经默认集成了LoadBalancer。**
+**在Spring Cloud构件微服务系统中，LoadBalancer作为服务消费者的负载均衡器，可以和RestTemplate相结合、和Feign相结合、还支持WebClient。Feign已经默认集成了LoadBalancer。**
+
+**工作步骤**：
+
+1. 从注册中心服务端查询并拉取服务列表，知道了它有多个服务，默认轮询调用正常执行。
+2. 按照指定的负载均衡策略从Server取到的服务注册列表中由客户端自己选择一个地址
 
 **官方文档**：https://docs.spring.io/spring-cloud-commons/reference/spring-cloud-commons/loadbalancer.html
 
@@ -98,7 +103,7 @@ public class UserController {
 
 ****
 
-实际上，在添加`@LoadBalanced`注解之后，会启用拦截器对发起的服务调用请求进行拦截（注意这里是针对我们发起的请求进行拦截），叫做LoadBalancerInterceptor，它实现ClientHttpRequestInterceptor接口：
+实际上，在添加`@LoadBalanced`注解之后，会启用拦截器对发起的服务调用请求进行拦截（注意这里是针对发起的请求进行拦截），叫做LoadBalancerInterceptor，它实现ClientHttpRequestInterceptor接口：
 
 ```java
 @FunctionalInterface
@@ -302,6 +307,59 @@ RoundRobinLoadBalancer的choose方法，以轮播方式获取一个serviceInstan
 	}
 ```
 
+## 负载均衡算法
+
+rest接口第几次请求数 % 服务器集群总数量 = 实际调用服务器位置下标 ，每次服务重启动后rest接口计数从1开始。
+
+```java
+List<ServiceInstance> instances = discoveryClient.getInstances("provider-user");
+```
+
+如：  
+
+```java
+List [0] instances = 127.0.0.1:8002
+List [1] instances = 127.0.0.1:8001
+```
+
+8001+ 8002 组合成为集群，它们共计2台机器，集群总数为2， 按照轮询算法原理：
+
+- 当总请求数为1时： 1 % 2 =1 对应下标位置为1 ，则获得服务地址为127.0.0.1:8001
+
+- 当总请求数位2时： 2 % 2 =0 对应下标位置为0 ，则获得服务地址为127.0.0.1:8002
+
+- 当总请求数位3时： 3 % 2 =1 对应下标位置为1 ，则获得服务地址为127.0.0.1:8001
+
+- 当总请求数位4时： 4 % 2 =0 对应下标位置为0 ，则获得服务地址为127.0.0.1:8002
+
+- 如此类推......
+
+## 获取服务列表
+
+使用DiscoveryClient动态获取所有上线的服务列表：
+
+```java
+@Resource
+private DiscoveryClient discoveryClient;
+@GetMapping("/user/discovery")
+public String discovery()
+{
+    List<String> services = discoveryClient.getServices();
+    for (String element : services) {
+        System.out.println(element);
+    }
+
+    System.out.println("===================================");
+
+    List<ServiceInstance> instances = discoveryClient.getInstances("provider-user");
+    for (ServiceInstance element : instances) {
+        System.out.println(element.getServiceId()+"\t"+element.getHost()+"\t"+element.getPort()+"\t"+element.getUri());
+    }
+
+    return instances.get(0).getServiceId()+":"+instances.get(0).getPort();
+}
+```
+
 ## 自定义负载均衡策略
 
 LoadBalancer默认提供了两种负载均衡策略：
@@ -309,7 +367,7 @@ LoadBalancer默认提供了两种负载均衡策略：
 - RandomLoadBalancer：随机分配策略
 - RoundRobinLoadBalancer**(默认)**：轮询分配策略
 
-修改默认的负载均衡策略可以进行指定，比如现在希望用户服务采用随机分配策略，我们需要先创建随机分配策略的配置类（不用加`@Configuration`）：
+修改默认的负载均衡策略可以进行指定，比如现在希望用户服务采用随机分配策略，需要先创建随机分配策略的配置类（不用加`@Configuration`）：
 
 ```java
 public class LoadBalancerConfig {
@@ -330,7 +388,7 @@ public class LoadBalancerConfig {
 
 ```java
 @Configuration
-@LoadBalancerClient(value = "userservice",      //指定为 userservice 服务，只要是调用此服务都会使用我们指定的策略
+@LoadBalancerClient(value = "userservice",      //指定为 userservice 服务，只要是调用此服务都会使用指定的策略
                     configuration = LoadBalancerConfig.class)   //指定我们刚刚定义好的配置类
 public class BeanConfig {
     @Bean
