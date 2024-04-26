@@ -29,7 +29,7 @@ NameServer只是存储Broker的信息，提供注册路由的功能。
 
 ## 消息刷盘
 
-![](assets/rocketmq_design_2.png)
+![](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202404262304918.png)
 
 - **同步刷盘**：如上图所示，只有在消息真正持久化至磁盘后RocketMQ的Broker端才会真正返回给Producer端一个成功的ACK响应。同步刷盘对MQ消息可靠性来说是一种不错的保障，但是性能上会有较大影响，一般适用于金融业务应用该模式较多。
 
