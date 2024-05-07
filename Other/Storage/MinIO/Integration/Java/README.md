@@ -244,7 +244,7 @@ void objectListTest() throws Exception {
 }
 ```
 
-![image-20240506230317282](./assets/image-20240506230317282.png)
+![image-20240506230317282](https://cdn.jsdelivr.net/gh/letengzz/tc2@main/img202405071312252.png)
 
 ### 删除文件
 
