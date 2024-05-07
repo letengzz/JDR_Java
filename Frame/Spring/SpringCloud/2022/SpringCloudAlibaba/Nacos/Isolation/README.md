@@ -36,8 +36,6 @@ namespace 的默认值为公共命名空间`public` (ID值为空串)，group 的
 - Group：实现方式简单，但是容易与DataID方案发生冲突，仅适合于本地调试
 - Namespace：实现方式简单，配置管理简单灵活，同时可以结合DataID共同使用
 
-
-
 ### Data ID方案
 
 该方案通过指定`spring.profile.active`和配置文件的DataID来使不同环境下读取不同的配置。
@@ -349,7 +347,7 @@ spring:
 
   ![image-20231115220535936](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202311152205475.png)
 
-  ![image-20231115221354338](assets/image-20231115221354338.png)
+  ![image-20231115221354338](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202404272153879.png)
 
 6. 切换为prod，重启项目：
 
