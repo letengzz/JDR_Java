@@ -12,15 +12,17 @@ https://dl.min.io/server/minio/release/windows-amd64/minio.exe
 
 ## 启动MinIO
 
-进入到minio.exe所在的目录，执行 `minio.exe server D:\data`，其中D:\data 为MinIO存储数据的目录路径
+使用管理员进入到minio.exe所在的目录，执行 `minio.exe server D:\Data\minio`，其中D:\Data\minio为MinIO存储数据的目录路径
 
 ```shell
-minio.exe server D:\data
+setx MINIO_ROOT_USER admin 
+setx MINIO_ROOT_PASSWORD password 
+minio.exe server D:\Data\minio --console-address ":9001"
 ```
 
 访问：http://localhost:9000/
 
-默认账号密码都是 minioadmin
+默认账号密码都是 `minioadmin`
 
 ![image-20240504141924742](https://cdn.jsdelivr.net/gh/letengzz/tc2@main/img202405041419090.png)
 
