@@ -1,4 +1,6 @@
-# RocketMQ 安全
+# RocketMQ ACL安全
+
+ACL (Access Control List)访问控制列表，是一种**细粒度**的权限管理策略，可以针对任意用户与组进行权限控制。目前大多数Unix系统和Linux 2.6版本已经支持ACL了。Unix和Linux系统默认使用UGO (User、Group、Other)权限控制策略。其是一个**粗粒度**的权限管理策略。
 
 1. 开启acl的控制 在broker.conf中开启：
 

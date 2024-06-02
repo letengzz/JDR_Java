@@ -2,6 +2,8 @@
 
 ## 准备工作
 
+**注意**：必须先安装64bit的JDK1.8或以上版本
+
 下载地址：https://rocketmq.apache.org/dowloading/releases/ 
 
 ![](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202403171602475.png)
@@ -113,10 +115,22 @@ mkdir logs
   nohup sh bin/mqnamesrv > ./logs/namesrv.log &
   ```
 
+  查看日志：
+
+  ```
+  tail -f ./logs/namesrv.log
+  ```
+
 - 启动broker 这里的-c是指定使用的配置文件：
 
   ```shell
   nohup sh bin/mqbroker -c conf/broker.conf > ./logs/broker.log &
+  ```
+
+  查看日志：
+
+  ```
+  tail -f ./logs/broker.log
   ```
 
 - 查看启动结果：
