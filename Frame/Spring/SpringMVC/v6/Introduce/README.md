@@ -46,6 +46,8 @@ public String login(@RequestParam("userName") String userName,Sting password){
 
 ![](https://cdn.jsdelivr.net/gh/letengzz/tc2@main/img/Java/202309181614857.png)
 
+因此，SpringMVC正是为了解决这种问题而生的，它是一个非常优秀的表示层框架，采用MVC思想设计实现。
+
 SpringMVC的作用主要覆盖的是**表述层**：
 
 -   请求映射
