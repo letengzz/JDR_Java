@@ -11,4 +11,4 @@
 
 **拓展**：
 
-- [IDEA 操作 SVN](../../IDE/IntelliJIDEA/Operate/idea_svn.md)
+- [IDEA 操作 SVN](../../IDE/IDEA/SVN/README.md)
