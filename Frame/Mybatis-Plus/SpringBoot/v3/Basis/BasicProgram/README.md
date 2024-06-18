@@ -49,14 +49,22 @@ INSERT INTO user (id, name, age, email) VALUES
 
 #### 引入依赖
 
+**说明**：在整合SpringBoot3时，使用3.5.5版本及以下需要按照下方引入依赖，3.5.6及以后仅需引入 `mybatis-plus-spring-boot3-starter`即可。
+
 > pom.xml
 
 ```xml
 <!-- mybatis-plus整合springboot -->
 <dependency>
-    <groupId>com.baomidou</groupId>
-    <artifactId>mybatis-plus-boot-starter</artifactId>
-    <version>3.5.5</version>
+	<groupId>com.baomidou</groupId>
+	<artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+	<version>3.5.5</version>
+	<exclusions>
+		<exclusion>
+			<groupId>org.mybatis</groupId>
+			<artifactId>mybatis-spring</artifactId>
+		</exclusion>
+	</exclusions>
 </dependency>
 <dependency>
     <groupId>org.mybatis</groupId>
@@ -111,6 +119,9 @@ spring:
 # 配置MyBatis-plus
 mybatis-plus:
   type-aliases-package: com.hjc.demo.pojo
+  global-config:
+    db-config:
+      update-strategy: not_empty # 在修改时只修改非空或非null的字段
 ```
 
 #### 启动类
