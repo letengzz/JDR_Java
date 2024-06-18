@@ -129,6 +129,37 @@ class UserMapperTest {
 }
 ```
 
+在Service中使用分页插件：使用`page(page,queryWrapper)`获取数据
+
+```java
+@RestController
+@RequestMapping("/api/role")
+public class SysRoleController {
+    @Resource
+    private SysRoleService sysRoleService;
+
+    @GetMapping("/list")
+    public ResultVo list(RoleParam param) {
+
+        //构建分页对象
+        IPage<SysRole> page = new Page<>();
+        //当前页、大小
+        page.setCurrent(param.getCurPage());
+        page.setSize(param.getPageSize());
+        //构造查询条件
+        QueryWrapper<SysRole> wrapper = new QueryWrapper<>();
+        if (!param.getRoleName().isEmpty()) {
+            wrapper.lambda().like(SysRole::getRoleName, param.getRoleName());
+        }
+        IPage<SysRole> pages = sysRoleService.page(page, wrapper);
+        if (pages != null) {
+            return ResultVo.success("查询成功！", pages);
+        }
+        return ResultVo.error("查询失败！！");
+    }
+}
+```
+
 ### PageHelper插件
 
 使⽤PageHelper的分⻚拦截器与自带的分页插件，⼆者冲突，推荐后者PageHelper进行分页
