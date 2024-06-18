@@ -49,15 +49,13 @@ INSERT INTO user (id, name, age, email) VALUES
 
 #### 引入依赖
 
-**说明**：在整合SpringBoot3时，使用3.5.5版本及以下需要按照下方引入依赖，3.5.6及以后仅需引入 `mybatis-plus-spring-boot3-starter`即可。
-
 > pom.xml
 
 ```xml
 <!-- mybatis-plus整合springboot -->
 <dependency>
 	<groupId>com.baomidou</groupId>
-	<artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+	<artifactId>mybatis-plus-boot-starter</artifactId>
 	<version>3.5.5</version>
 	<exclusions>
 		<exclusion>
@@ -81,6 +79,16 @@ INSERT INTO user (id, name, age, email) VALUES
 <dependency>
     <groupId>com.mysql</groupId>
     <artifactId>mysql-connector-j</artifactId>
+</dependency>
+```
+
+在整合SpringBoot3时，建议引入 `mybatis-plus-spring-boot3-starter`：
+
+```xml
+<dependency>
+	<groupId>com.baomidou</groupId>
+	<artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+	<version>3.5.6</version>
 </dependency>
 ```
 
