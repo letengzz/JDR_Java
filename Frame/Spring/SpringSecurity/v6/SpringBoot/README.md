@@ -13,7 +13,7 @@
 
 - [Spring Security 其他配置](Other/README.md)
 
-> Spring Security 其他配置：CSRF防护、跨域、自定义登录界面、记住我功能、用户认证信息、会话并发处理
+> Spring Security 其他配置：默认配置、密码加密、CSRF防护、跨域、自定义登录界面、记住我功能、用户认证信息、会话并发处理
 
 - [Spring Security 授权](Authorization/README.md)
 

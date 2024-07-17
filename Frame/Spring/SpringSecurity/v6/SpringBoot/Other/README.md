@@ -595,7 +595,7 @@ public SecurityFilterChain filterChain(HttpSecurity http,PersistentTokenReposito
 1. SecurityContextHolder：SecurityContextHolder 是 Spring Security 存储已认证用户详细信息的地方。
 2. SecurityContext：SecurityContext 是从 SecurityContextHolder 获取的内容，包含当前已认证用户的 Authentication 信息。
 3. Authentication：Authentication 表示用户的身份认证信息。它包含了用户的Principal、Credential和Authority信息。
-4. Principal：表示用户的身份标识。它通常是一个表示用户的实体对象，例如用户名。Principal可以通过Authentication对象的getPrincipal()方法获取。
+4. Principal：表示用户的身份标识。它通常是一个表示用户的实体对象 (UserDetails)，例如用户名。Principal可以通过Authentication对象的getPrincipal()方法获取。
 5. Credentials：表示用户的凭证信息，例如密码、证书或其他认证凭据。Credential可以通过Authentication对象的getCredentials()方法获取。
 6. GrantedAuthority：表示用户被授予的权限
 
@@ -635,6 +635,39 @@ public class IndexController {
         result.put("data", username);
 
         return result;
+    }
+}
+```
+
+在Spring中该对象已经被注册到容器中，可以直接获取该对象：
+
+```java
+@RestController
+public class CurrentLoginUserInfoController {
+
+    /**
+     * 从当前请求对象中获取
+     */
+    @GetMapping("/getLoginUserInfo")
+    public Principal getLoginUserInfo(Principal principle){
+            return principle;
+    }
+    /**
+     *从当前请求对象中获取
+     */
+    @GetMapping("/getLoginUserInfo1")
+    public Authentication getLoginUserInfo1(Authentication authentication){
+        return authentication;
+    }
+
+    /**    
+     * 从SecurityContextHolder获取
+     * @return
+     */
+    @GetMapping("/getLoginUserInfo2")
+    public Authentication getLoginUserInfo(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication;
     }
 }
 ```

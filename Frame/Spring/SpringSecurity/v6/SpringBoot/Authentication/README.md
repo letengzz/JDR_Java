@@ -39,7 +39,7 @@ public class SecurityConfiguration {
         UserDetails user = User.withDefaultPasswordEncoder()
                 .username("user")
                 .password("password")
-                .roles("USER")  //角色目前我们不需要关心，随便写就行，后面会专门讲解
+                .roles("USER")  //角色前面加上ROLE_ 变成权限
                 .build();
         UserDetails admin = User.withDefaultPasswordEncoder()
                 .username("admin")
