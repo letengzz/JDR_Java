@@ -1,8 +1,12 @@
 # EasyExcel
 
+Java领域解析，生成Excel比较有名的框架有Apache poi、jxl等，但他们都存在一个严重的问题就是非常的耗内存，如果你的系统并发量不大的话可能还行，但是一旦并发上来后一定会OOM或者JVM频繁的full gc。
+
 EasyExcel是一个基于Java的**简单**、**省内存**的读写Excel的阿里**开源项目**。在尽可能节约内存的情况下支持**读写百兆**的Excel。
 
-在项目中，涉及到Excel文件、CVS文件大多数的读写操作，均可使用EasyExcel
+EasyExcel**采用一行一行的解析模式**，并将一行的解析结果以观察者的模式通知处理 (AnalysisEventListener)。
+
+在项目中，涉及到Excel文件、CVS文件大多数的读写操作，均可使用EasyExcel。
 
 **官方文档**：https://easyexcel.opensource.alibaba.com
 
