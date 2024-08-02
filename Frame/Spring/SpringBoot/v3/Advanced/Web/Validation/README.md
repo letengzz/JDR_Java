@@ -1,6 +1,6 @@
 # 参数校验
 
-在项目里面，很有可能用户发送的数据存在一些问题，所以需要对前端传入的参数做一个简单的简单的校验，**避免出现脏数据和业务逻辑错误**。如果每个接口单独写校验逻辑的话，需要在controller层做逻辑判断。参数较少时，还勉强能够接受，如果参数和接口较多，无形中加重了工作量，也多了很多重复代码。所以引入注解式参数校验很有必要。
+在项目里面，很有可能用户发送的数据存在一些问题，所以需要对前端传入的参数做一个简单的校验，**避免出现脏数据和业务逻辑错误以及绕过前端传入非法数据**。如果每个接口单独写校验逻辑的话，需要在controller层做逻辑判断。参数较少时，还勉强能够接受，如果参数和接口较多，无形中加重了工作量，也多了很多重复代码。所以引入注解式参数校验很有必要。
 
 SpringBoot提供了很方便的接口校验框架来解决上述问题。
 
@@ -12,6 +12,11 @@ SpringBoot提供了很方便的接口校验框架来解决上述问题。
     <artifactId>spring-boot-starter-validation</artifactId>
 </dependency>
 ```
+
+该依赖会引入：
+
+1. JSR303规范：jakarta.validation-api
+2. hibernate校验：hibernate-validator
 
 ## 使用注解完成接口校验
 
@@ -41,13 +46,18 @@ public class TestController {
 
 ## 对象类型校验
 
-对于对象类型接收前端发送的表单数据的，可以校验参数中的每个属性进行验证：
+对于对象类型接收前端发送的表单数据的，可以校验参数中的每个属性进行验证。
+
+两种方式表示需要验证的对象：
+
+1. 在参数上添加`@Valid`注解表示需要验证 (Java提供)
+2. 在参数上添加`@Validated`注解表示需要验证 (Spring提供)
 
 ```java
 @ResponseBody
-@PostMapping("/submit")  //在参数上添加@Valid注解表示需要验证
-public String submit(@Valid Account account){
-    System.out.println(account.getUsername().substring(3));
+@PostMapping("/submit")  
+//public String submit(@Valid Account account){
+public String submit(@Validated Account account){ System.out.println(account.getUsername().substring(3));
     System.out.println(account.getPassword().substring(2, 10));
     return "请求成功!";
 }
@@ -66,6 +76,49 @@ public class Account {
 ## 常用注解
 
 ![](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202404172339378.png)
+
+相关注解参考源码：
+
+- jakarta.validation-api：jakarta.validation.constraints
+
+  ![image-20240801215813741](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202408012158952.png)
+
+- hibernate-validator：org.hibernate.validator.constraints
+
+  ![image-20240801215959810](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202408012200438.png)
+
+## 获取校验结果
+
+只需要在参数后面添加BindingResult就可以获取完整的校验结果。
+
+**注意**：
+
+- 当多个参数时，每一个参数后接一个BindingResult返回对象来返回校验结果。
+
+- 一旦添加BindingResult就需要手动处理错误。
+
+  **原理**：一旦写了BindingResult，所有错误信息会被封装在BindingResult中，不会抛异常
+
+```java
+@ResponseBody
+@PostMapping("/submit")  //在参数上添加@Valid注解表示需要验证
+public String submit(@Valid Account account, BindingResult bindingResult) {
+    //判断是否发生校验错误
+    if (bindingResult.hasErrors()) {
+        HashMap<String, String> errors = new HashMap<>();
+        //获取所有的错误信息
+        bindingResult.getFieldErrors().forEach((fieldError) -> {
+            //获取发生错误的字段名
+            String field = fieldError.getField();
+            //获取错误信息
+            String message = fieldError.getDefaultMessage();
+            errors.put(field, message);
+        });
+        return errors.toString();
+    }
+    return "请求成功!";
+}
+```
 
 ## 异常捕获器的作用
 
@@ -188,3 +241,58 @@ public class GlobalExceptionHandler {
     }
 }
 ```
+
+## 配置异常消息
+
+可以配合Spring的消息机制，对错误信息做成定制化、国际化。
+
+配置消息文件：
+
+> application.yaml
+
+```yaml
+# 配置基本消息名
+spring:
+  messages:
+    basename: i18n/message
+```
+
+消息文件中配置提示代码：
+
+![image-20240801223611175](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202408012236078.png)
+
+> i18n/message.properties
+
+```properties
+username.not3=用户名不能低于3
+password.not10=密码不能低于10
+```
+
+> i18n/message_en_US.properties
+
+```properties
+username.not3=username length not 3
+password.not10=username length not 10
+```
+
+## 自定义校验注解
+
+添加注解：
+
+> com.hjc.demo.constraints.UniqueUser
+
+```java
+
+```
+
+添加自定义校验器：
+
+> 
+
+```java
+
+```
+
+## 分组校验
+
+尽量不要使用分组校验。
