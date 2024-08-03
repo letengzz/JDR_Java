@@ -81,3 +81,12 @@ public interface ProductMapper extends BaseMapper<Product> {
 }
 ```
 
+## 调整模板
+
+使用IDEA打开该位置：
+
+![image-20240803135716834](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202408031357283.png)
+
+添加FreeMarker模板，并在meta.xml中添加：
+
+![image-20240803140416096](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202408031404256.png)
