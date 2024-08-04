@@ -52,10 +52,6 @@ spring:
     name: configserver
 ```
 
-启动：
-
-![image-20230316155235821](https://cdn.jsdelivr.net/gh/letengzz/Two-C@main/img/Java/202303281421641.png)
-
 以本地仓库为例，首先在项目目录下创建一个本地Git仓库，打开终端，在桌面上创建一个新的本地仓库：
 
 ![image-20230316155630431](https://cdn.jsdelivr.net/gh/letengzz/Two-C@main/img/Java/202303281421890.png)
@@ -86,7 +82,7 @@ public class ConfigApplication {
 
 在配置文件中，添加本地仓库的一些信息（远程仓库同理），详细使用教程：https://docs.spring.io/spring-cloud-config/docs/current/reference/html/#_git_backend
 
-**注意**：Config Server默认存储配置的⽅式是git，如果git仓库是公开仓库，username和password属性可以省略不配置，否则必须配置username和password。
+**注意**：Config Server默认存储配置的方式是git，如果git仓库是公开仓库，username和password属性可以省略不配置，否则必须配置username和password。
 
 ```yaml
 server:
