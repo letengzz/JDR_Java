@@ -4,6 +4,8 @@ SpringBoot是整合Spring技术栈的一站式框架，简化Spring技术栈的*
 
 Spring Boot改变了配置文件复杂、依赖管理混乱、简化了集成其他框架。
 
+简单来说，**SpringBoot 能简化开发，简化配置，简化整合，简化部署，简化监控，简化运维**
+
 Spring Boot **特性**： 
 
 1. 快速创建独立的 Spring 应用程序(**SpringBoot底层是Spring**)。 
