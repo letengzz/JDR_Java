@@ -18,4 +18,5 @@
 
 - [IDEA 操作 Git](../../IDE/IDEA/Git/README.md)
 - [Git 客户端工具](Tools/README.md)
+- [优秀的开源项目](../../../Project/README.md)
 
