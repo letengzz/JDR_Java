@@ -119,6 +119,42 @@ logging:
     root: debug
 ```
 
+```properties
+#数据源基本配置
+spring.datasource.url=jdbc:mysql://192.168.200.100:3306/demo
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.datasource.username=root
+spring.datasource.password=123456
+spring.datasource.type=com.alibaba.druid.pool.DruidDataSource
+
+# 配置StatFilter监控
+spring.datasource.druid.filter.stat.enabled=true
+spring.datasource.druid.filter.stat.db-type=mysql
+spring.datasource.druid.filter.stat.log-slow-sql=true
+spring.datasource.druid.filter.stat.slow-sql-millis=2000
+# 配置WallFilter防火墙
+spring.datasource.druid.filter.wall.enabled=true
+spring.datasource.druid.filter.wall.db-type=mysql
+spring.datasource.druid.filter.wall.config.delete-allow=false
+spring.datasource.druid.filter.wall.config.drop-table-allow=false
+# 配置监控页，内置监控页面的首页是 /druid/index.html
+spring.datasource.druid.stat-view-servlet.enabled=true
+spring.datasource.druid.stat-view-servlet.login-username=admin
+spring.datasource.druid.stat-view-servlet.login-password=admin
+spring.datasource.druid.stat-view-servlet.allow=*
+
+# 其他 Filter 配置不再演示
+# 目前为以下 Filter 提供了配置支持，请参考文档或者根据IDE提示（spring.datasource.druid.filter.*）进行配置。
+# StatFilter
+# WallFilter
+# ConfigFilter
+# EncodingConvertFilter
+# Slf4jLogFilter
+# Log4jFilter
+# Log4j2Filter
+# CommonsLogFilter
+```
+
 编写Controller：
 
 ```java
@@ -159,3 +195,6 @@ com.alibaba.druid.spring.boot3.autoconfigure.DruidDataSourceAutoConfigure
 ```
 
 ![image-20231224202815860](https://cdn.jsdelivr.net/gh/letengzz/tc2/img202312242028390.png)
+
+
+

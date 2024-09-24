@@ -17,8 +17,8 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
                            .authenticated() //已认证的请求会被自动授权
                           )
         .formLogin(withDefaults())//使用表单授权方式
+        //.formLogin().permitAll()  //允许表单登录 permit：允许
         .httpBasic(withDefaults());//使用基本授权方式
-
     return http.build();
 }
 ```

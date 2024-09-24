@@ -21,7 +21,7 @@
 **Spring Cloud分布式微服务服务配置中心解决方案**：
 
 - [Apollo](../../Apollo/README.md)
-- [Consul](../../Consul/Config/README.md)
+- [Consul](../../SpringCloud/Consul/Config/README.md)
 - [Spring Cloud Config](../../SpringCloud/Config/README.md)
 - [Nacos Config](../../SpringCloudAlibaba/Nacos/Config/README.md)
 - [Zookeeper](../../Zookeeper/Config/README.md)

@@ -145,6 +145,8 @@ public class Student {
 }
 ```
 
+**注意**：mapper.xml 中，直接使用 `枚举对象.sex`进行判断。
+
 ###  枚举属性，实现 IEnum 接口
 
 **创建枚举类型**：
