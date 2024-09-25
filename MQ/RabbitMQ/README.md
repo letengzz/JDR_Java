@@ -10,6 +10,7 @@
 - [RabbitMQ 死信队列](DeadQueue/README.md)
 - [RabbitMQ 集群搭建](Cluster/README.md)
 - [RabbitMQ 常见错误](Error/README.md)
+- [RabbitMQ 插件](Plugins/README.m)
 
 **拓展**：
 

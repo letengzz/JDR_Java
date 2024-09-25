@@ -58,7 +58,15 @@ type属性用来定义主键策略。
 
 **常用的主键策略**：
 
-![图片1](https://cdn.jsdelivr.net/gh/letengzz/Two-C@main/img/Java/202302261314819.png)
+- `IdType.ASSIGN_ID` (默认主键策略)：生成唯一的值，基于雪花算法的策略生成数据id，与数据库id是否设置自增无关，包含数字，表对应字段类型bigint或者varchar类型
+
+- `ASSIGN_UUID`：生成唯一的值，包含数字和字母，表对应字段类型varchar类型
+
+- `IdType.AUTO`：使用数据库的自增策略，主键自动增长效果和表字段auto_increment
+
+  **注意**：该类型请确保数据设置了id自增，否则无效
+
+- `IdType.INPUT`：需要手动设置id值
 
 ```java
 @Data //lombok注解
